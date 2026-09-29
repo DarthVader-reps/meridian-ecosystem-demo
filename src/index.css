@@ -1,0 +1,77 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+  --color-ink: #0a0a0b;
+  --color-ink-soft: #1c1c1e;
+  --color-paper: #ffffff;
+  --color-mist: #f5f5f4;
+  --color-line: #e7e7e5;
+  --color-muted: #6b7280;
+
+  --color-accent: #1b5cff;
+  --color-accent-ink: #ffffff;
+  --color-accent-soft: #e8efff;
+
+  --animate-reveal: reveal 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+  @keyframes reveal {
+    from {
+      opacity: 0;
+      transform: translateY(18px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--color-accent);
+  color: #fff;
+}
+
+/* Accessible focus ring */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Thin scrollbars for ticker / tables */
+.thin-scroll::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+.thin-scroll::-webkit-scrollbar-thumb {
+  background: #c9c9c7;
+  border-radius: 999px;
+}
+.dark .thin-scroll::-webkit-scrollbar-thumb {
+  background: #3a3a3d;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
