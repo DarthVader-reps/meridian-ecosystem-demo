@@ -16,6 +16,21 @@ interface Tier {
 
 const tiers = tiersData as Tier[]
 
+// A tier effectively includes its own benefits plus every lower tier's,
+// with the "Everything in …" shorthand expanded so the compare table
+// stays consistent (tiers are ordered ascending in tiers.json).
+const isInheritedPlaceholder = (b: string) => b.startsWith('Everything in ')
+
+function effectiveBenefits(tierIndex: number): string[] {
+  const out: string[] = []
+  for (let i = 0; i <= tierIndex; i++) {
+    for (const b of tiers[i].benefits) {
+      if (!isInheritedPlaceholder(b) && !out.includes(b)) out.push(b)
+    }
+  }
+  return out
+}
+
 export default function MembershipPage() {
   const tier = useMembership((s) => s.tier)
   const setTier = useMembership((s) => s.setTier)
@@ -32,7 +47,9 @@ export default function MembershipPage() {
     pushToast('Membership updated', `You are now on ${t.name}.`)
   }
 
-  const allBenefits = tiers.flatMap((t) => t.benefits).filter((b, i, arr) => arr.indexOf(b) === i)
+  const allBenefits = tiers
+    .flatMap((_, i) => effectiveBenefits(i))
+    .filter((b, i, arr) => arr.indexOf(b) === i)
 
   return (
     <Page title="Membership" intro="Pick the plan that fits. Switch tiers any time; billing is simulated.">
@@ -93,9 +110,9 @@ export default function MembershipPage() {
                   {allBenefits.map((b, i) => (
                     <tr key={b} className={i % 2 === 1 ? 'bg-mist/50 dark:bg-ink/50' : undefined}>
                       <td className="px-4 py-2.5 text-ink dark:text-paper">{b}</td>
-                      {tiers.map((t) => (
+                      {tiers.map((t, ti) => (
                         <td key={t.id} className="px-4 py-2.5 text-center text-muted">
-                          {t.benefits.includes(b) ? 'Yes' : '–'}
+                          {effectiveBenefits(ti).includes(b) ? 'Yes' : '–'}
                         </td>
                       ))}
                     </tr>
