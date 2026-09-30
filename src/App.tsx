@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { HashRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { DemoBar, Navbar, Footer, Breadcrumbs } from './components/layout'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import { Toasts } from './components/ui'
 import { useUI } from './store/ui'
 import Home from './pages/Home'
@@ -102,11 +103,12 @@ function Shell() {
 
 export default function App() {
   // useTransitions={false}: apply hash-route location updates synchronously.
-  // The default wraps them in React.startTransition, which has been observed
-  // to leave a blank page on real browsers after client-side navigation.
+  // The ErrorBoundary surfaces any render crash visibly instead of a blank page.
   return (
-    <HashRouter useTransitions={false}>
-      <Shell />
-    </HashRouter>
+    <ErrorBoundary>
+      <HashRouter useTransitions={false}>
+        <Shell />
+      </HashRouter>
+    </ErrorBoundary>
   )
 }
