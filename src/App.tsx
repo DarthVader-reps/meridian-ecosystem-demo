@@ -101,8 +101,11 @@ function Shell() {
 }
 
 export default function App() {
+  // useTransitions={false}: apply hash-route location updates synchronously.
+  // The default wraps them in React.startTransition, which has been observed
+  // to leave a blank page on real browsers after client-side navigation.
   return (
-    <HashRouter>
+    <HashRouter useTransitions={false}>
       <Shell />
     </HashRouter>
   )
