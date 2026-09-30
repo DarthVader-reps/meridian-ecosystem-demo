@@ -6,6 +6,7 @@ interface ErrorBoundaryProps {
 
 interface ErrorBoundaryState {
   error: Error | null
+  componentStack: string | null
 }
 
 /**
@@ -14,18 +15,19 @@ interface ErrorBoundaryState {
  * diagnostic surface: the message below identifies the crashing component.
  */
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  state: ErrorBoundaryState = { error: null }
+  state: ErrorBoundaryState = { error: null, componentStack: null }
 
   static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-    return { error }
+    return { error, componentStack: null }
   }
 
-  componentDidCatch(error: Error) {
-    console.error('[Meridian] Render crash caught by ErrorBoundary:', error)
+  componentDidCatch(error: Error, info: { componentStack?: string }) {
+    console.error('[Meridian] Render crash caught by ErrorBoundary:', error, info.componentStack)
+    this.setState((s) => ({ ...s, componentStack: info.componentStack ?? null }))
   }
 
   render() {
-    const { error } = this.state
+    const { error, componentStack } = this.state
     if (error) {
       return (
         <div
@@ -48,6 +50,14 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
           >
             {error.stack}
           </pre>
+          {componentStack && (
+            <pre
+              data-testid="error-component-stack"
+              style={{ marginTop: 12, whiteSpace: 'pre-wrap', fontSize: 12, color: '#046' }}
+            >
+              {componentStack}
+            </pre>
+          )}
           <button
             type="button"
             onClick={() => this.setState({ error: null })}
