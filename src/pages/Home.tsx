@@ -3,6 +3,8 @@ import { BRAND } from '../config/brand'
 import { Button, Card, Reveal, SectionHeader, Ticker } from '../components/ui'
 import assets from '../mock/assets.json'
 
+const BASE = import.meta.env.BASE_URL
+
 const AREAS = [
   { title: 'Invest', body: 'Plans, stocks, crypto, and real estate in one place.', to: '/invest/plans', cta: 'Start investing' },
   { title: 'Trade', body: 'Demo trading, live-style charts, and copy trading.', to: '/trading/demo', cta: 'Open trading' },
@@ -11,45 +13,136 @@ const AREAS = [
   { title: 'Wallet', body: 'Deposits, swaps, and transfers — all simulated.', to: '/wallet/deposit', cta: 'Fund wallet' },
 ]
 
-const HIGHLIGHTS = [
-  { title: 'One balance everywhere', body: 'A deposit updates your wallet, portfolio, and history instantly. Everything is stored in your browser.' },
-  { title: 'Practice without risk', body: 'Demo trading runs on a simulated feed with a $100,000 practice balance. Reset it any time.' },
-  { title: 'Copy experienced traders', body: 'Browse trader stats on simulated track records, then copy or stop copying in one tap.' },
+const STATS = [
+  { value: '$100K', label: 'Demo trading balance' },
+  { value: '5', label: 'Ecosystem areas' },
+  { value: '0', label: 'Real money at risk' },
+]
+
+const CHAPTERS = [
+  {
+    eyebrow: 'Invest',
+    title: 'Grow on your terms',
+    body: 'Plans, stocks, crypto, and real estate — one calm dashboard, simulated funds.',
+    cta: 'Explore investments',
+    to: '/invest/plans',
+    img: `${BASE}media/invest-visual.webp`,
+  },
+  {
+    eyebrow: 'Trade',
+    title: 'Trade at the speed of now',
+    body: 'Demo trading with live-style charts, copy trading, and an AI bot. Zero real risk.',
+    cta: 'Open trading',
+    to: '/trading/demo',
+    img: `${BASE}media/trading-visual.webp`,
+  },
+  {
+    eyebrow: 'Vehicles',
+    title: 'Electric, fictional, yours to browse',
+    body: 'A curated inventory of fictional electric vehicles. Reserve a demo test drive.',
+    cta: 'Browse inventory',
+    to: '/vehicles',
+    img: `${BASE}media/vehicle-showcase.webp`,
+  },
 ]
 
 export default function Home() {
   const tickerItems = assets.map((a) => ({ symbol: a.symbol, price: a.price, changePct: a.changePct }))
   return (
     <div>
-      {/* Hero — full bleed, dark, abstract SVG shapes only */}
-      <section className="relative -mt-14 overflow-hidden bg-ink text-white" aria-label="Intro">
-        <svg aria-hidden="true" className="absolute inset-0 h-full w-full opacity-[0.14]">
-          <circle cx="85%" cy="15%" r="220" fill="none" stroke="#fff" strokeWidth="1" />
-          <circle cx="85%" cy="15%" r="150" fill="none" stroke="#fff" strokeWidth="1" />
-          <circle cx="8%" cy="85%" r="180" fill="none" stroke="#fff" strokeWidth="1" />
-          <line x1="0" y1="62%" x2="100%" y2="62%" stroke="#fff" strokeWidth="1" />
-          <line x1="30%" y1="0" x2="30%" y2="100%" stroke="#fff" strokeWidth="1" />
-        </svg>
-        <div className="relative mx-auto flex min-h-[88vh] max-w-7xl flex-col justify-center px-4 pt-24 pb-16 sm:px-6">
+      {/* Hero — full-bleed video, Tesla-style */}
+      <section className="relative -mt-14 flex min-h-[100vh] items-center justify-center overflow-hidden bg-ink text-white" aria-label="Intro">
+        <video
+          className="absolute inset-0 h-full w-full object-cover"
+          src={`${BASE}media/hero-car.mp4`}
+          autoPlay
+          muted
+          loop
+          playsInline
+          aria-hidden="true"
+        />
+        <div className="absolute inset-0 bg-black/45" aria-hidden="true" />
+        <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black/60 to-transparent" aria-hidden="true" />
+        <div className="relative mx-auto max-w-4xl px-4 pt-24 pb-16 text-center sm:px-6">
           <Reveal>
-            <p className="text-xs font-semibold uppercase tracking-widest text-white/60">{BRAND.tagline}</p>
-            <h1 className="mt-4 max-w-3xl text-5xl font-semibold tracking-tight sm:text-7xl">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/60">{BRAND.tagline}</p>
+            <h1 className="mt-4 text-5xl font-semibold tracking-tight sm:text-7xl">
               Money, made manageable.
             </h1>
-            <p className="mt-5 max-w-xl text-lg text-white/70">
+            <p className="mx-auto mt-5 max-w-xl text-lg text-white/70">
               Invest, trade, and track everything from one calm dashboard. This demo runs on simulated funds.
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Button size="lg" to="/invest/plans">Start investing</Button>
-              <Button size="lg" variant="secondary" to="/trading/demo" className="!bg-white/10 !text-white hover:!bg-white/20">
+            <div className="mt-8 flex flex-wrap justify-center gap-3">
+              <Link
+                to="/invest/plans"
+                className="inline-flex min-w-[200px] items-center justify-center rounded-[4px] bg-[var(--color-accent)] px-7 py-3.5 text-base font-medium text-white transition-opacity hover:opacity-90"
+              >
+                Start investing
+              </Link>
+              <Link
+                to="/trading/demo"
+                className="inline-flex min-w-[200px] items-center justify-center rounded-[4px] bg-white/10 px-7 py-3.5 text-base font-medium text-white backdrop-blur-sm transition-colors hover:bg-white/20"
+              >
                 Try demo trading
-              </Button>
+              </Link>
             </div>
           </Reveal>
+        </div>
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white/40" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="animate-bounce">
+            <path d="M6 9l6 6 6-6" />
+          </svg>
         </div>
       </section>
 
       <Ticker items={tickerItems} />
+
+      {/* Stat band */}
+      <section className="border-y border-line dark:border-[#2a2a2d] bg-ink text-white" aria-label="Key figures">
+        <div className="mx-auto grid max-w-7xl grid-cols-1 divide-y divide-white/10 px-4 sm:grid-cols-3 sm:divide-x sm:divide-y-0 sm:px-6">
+          {STATS.map((s) => (
+            <div key={s.label} className="py-10 text-center sm:py-14">
+              <Reveal>
+                <p className="text-5xl font-semibold tracking-tight sm:text-6xl">{s.value}</p>
+                <p className="mt-2 text-sm uppercase tracking-widest text-white/50">{s.label}</p>
+              </Reveal>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Chapters — full-bleed image bands */}
+      {CHAPTERS.map((c, i) => (
+        <section
+          key={c.to}
+          className="relative flex min-h-[80vh] items-center overflow-hidden bg-ink text-white"
+          aria-label={c.title}
+        >
+          <img
+            src={c.img}
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-0 h-full w-full object-cover"
+            loading="lazy"
+          />
+          <div className="absolute inset-0 bg-black/50" aria-hidden="true" />
+          <div className={`relative mx-auto w-full max-w-7xl px-4 sm:px-6 ${i % 2 === 1 ? 'text-right' : ''}`}>
+            <Reveal className={`max-w-xl ${i % 2 === 1 ? 'ml-auto' : ''}`}>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/60">{c.eyebrow}</p>
+              <h2 className="mt-3 text-4xl font-semibold tracking-tight sm:text-5xl">{c.title}</h2>
+              <p className="mt-4 text-lg text-white/70">{c.body}</p>
+              <div className={`mt-8 ${i % 2 === 1 ? 'flex justify-end' : ''}`}>
+                <Link
+                  to={c.to}
+                  className="inline-flex min-w-[200px] items-center justify-center rounded-[4px] bg-white px-7 py-3.5 text-base font-medium text-ink transition-opacity hover:opacity-90"
+                >
+                  {c.cta}
+                </Link>
+              </div>
+            </Reveal>
+          </div>
+        </section>
+      ))}
 
       {/* Entry cards */}
       <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6" aria-label="Ecosystem areas">
@@ -79,24 +172,6 @@ export default function Home() {
               </Link>
             </Card>
           </Reveal>
-        </div>
-      </section>
-
-      {/* Highlights */}
-      <section className="border-t border-line dark:border-[#2a2a2d] bg-mist dark:bg-ink-soft" aria-label="Highlights">
-        <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
-          <Reveal>
-            <SectionHeader title="Built for clarity" />
-          </Reveal>
-          <div className="mt-10 grid gap-10 md:grid-cols-3">
-            {HIGHLIGHTS.map((h, i) => (
-              <Reveal key={h.title} delay={i * 80}>
-                <p className="text-xs font-semibold uppercase tracking-widest text-[var(--color-accent)]">0{i + 1}</p>
-                <h3 className="mt-2 text-xl font-semibold text-ink dark:text-paper">{h.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted">{h.body}</p>
-              </Reveal>
-            ))}
-          </div>
         </div>
       </section>
 
