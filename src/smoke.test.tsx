@@ -5,7 +5,11 @@ import { MemoryRouter } from 'react-router-dom'
 // Render the route table at several paths to catch runtime crashes.
 const ROUTES = [
   '/',
+  '/invest',
   '/invest/plans',
+  '/trading',
+  '/wallet',
+  '/account',
   '/invest/stocks',
   '/invest/stocks/MRDN',
   '/invest/crypto',

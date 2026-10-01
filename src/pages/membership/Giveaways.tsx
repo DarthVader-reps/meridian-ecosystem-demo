@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Page } from '../../components/layout'
 import { Badge, Button, Card, EmptyState, LoadingState, Tabs } from '../../components/ui'
+import { useRequireLogin } from '../../components/useRequireLogin'
 import { useMembership } from '../../store/membership'
 import { useUI } from '../../store/ui'
 import giveawaysData from '../../mock/giveaways.json'
@@ -23,6 +24,7 @@ export default function GiveawaysPage() {
   const giveawayEntries = useMembership((s) => s.giveawayEntries)
   const enterGiveaway = useMembership((s) => s.enterGiveaway)
   const pushToast = useUI((s) => s.pushToast)
+  const requireLogin = useRequireLogin()
   const [loading, setLoading] = useState(true)
   const [tab, setTab] = useState<TabId>('active')
 
@@ -36,6 +38,7 @@ export default function GiveawaysPage() {
   const past = giveaways.filter((g) => g.status === 'past')
 
   const enter = (g: Giveaway) => {
+    if (!requireLogin()) return
     enterGiveaway(g.id)
     pushToast('Entry recorded (simulated)', `You entered "${g.title}".`)
   }

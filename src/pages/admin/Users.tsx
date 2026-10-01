@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAdmin, type AdminUser } from '../../store/admin'
 import { useUI } from '../../store/ui'
-import { Card, SectionHeader, Badge, Input, Select, Button, EmptyState } from '../../components/ui'
+import { Card, SectionHeader, Badge, Input, Select, Button, EmptyState, Modal } from '../../components/ui'
 import DataSourceBadge from '../../components/DataSourceBadge'
 import { isSupabaseConfigured } from '../../config/supabase'
 import {
@@ -33,6 +33,8 @@ function SupabaseUsers() {
   const [profiles, setProfiles] = useState<SupabaseProfile[]>([])
   const [query, setQuery] = useState('')
   const [busyId, setBusyId] = useState<string | null>(null)
+  const [pendingStatus, setPendingStatus] = useState<SupabaseProfile | null>(null)
+  const [pendingRole, setPendingRole] = useState<{ p: SupabaseProfile; role: 'user' | 'admin' } | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -69,6 +71,31 @@ function SupabaseUsers() {
     pushToast(okMsg, name)
     const r = await fetchProfiles()
     if (!r.error) setProfiles(r.profiles)
+  }
+
+  async function confirmPendingStatus() {
+    const p = pendingStatus
+    if (!p) return
+    const next = p.status === 'active' ? 'suspended' : 'active'
+    setPendingStatus(null)
+    await runUpdate(
+      p.id,
+      () => updateProfileStatus(p.id, next),
+      next === 'suspended' ? 'User suspended' : 'User reactivated',
+      p.name || p.email || '',
+    )
+  }
+
+  async function confirmPendingRole() {
+    const pr = pendingRole
+    if (!pr) return
+    setPendingRole(null)
+    await runUpdate(
+      pr.p.id,
+      () => updateProfileRole(pr.p.id, pr.role),
+      'Role updated',
+      `${pr.p.name || pr.p.email || ''} → ${pr.role}`,
+    )
   }
 
   const filtered = profiles.filter((p) => {
@@ -187,14 +214,7 @@ function SupabaseUsers() {
                       <Select
                         value={p.role}
                         disabled={busyId === p.id}
-                        onChange={(e) =>
-                          runUpdate(
-                            p.id,
-                            () => updateProfileRole(p.id, e.target.value as 'user' | 'admin'),
-                            'Role updated',
-                            p.name || p.email || '',
-                          )
-                        }
+                        onChange={(e) => setPendingRole({ p, role: e.target.value as 'user' | 'admin' })}
                         aria-label={`Role for ${p.name || p.email}`}
                         className="!w-auto !py-1 text-xs"
                       >
@@ -217,15 +237,7 @@ function SupabaseUsers() {
                         size="sm"
                         variant={p.status === 'active' ? 'secondary' : 'primary'}
                         disabled={busyId === p.id}
-                        onClick={() => {
-                          const next = p.status === 'active' ? 'suspended' : 'active'
-                          void runUpdate(
-                            p.id,
-                            () => updateProfileStatus(p.id, next),
-                            next === 'suspended' ? 'User suspended' : 'User reactivated',
-                            p.name || p.email || '',
-                          )
-                        }}
+                        onClick={() => setPendingStatus(p)}
                       >
                         {p.status === 'active' ? 'Suspend' : 'Reactivate'}
                       </Button>
@@ -237,6 +249,63 @@ function SupabaseUsers() {
           </div>
         )}
       </Card>
+
+      <Modal
+        open={pendingStatus !== null}
+        onClose={() => setPendingStatus(null)}
+        title={pendingStatus && pendingStatus.status === 'active' ? 'Suspend user?' : 'Reactivate user?'}
+      >
+        {pendingStatus && (
+          <div className="space-y-4">
+            <p className="text-sm text-muted">
+              {pendingStatus.status === 'active' ? (
+                <>
+                  <span className="font-semibold text-ink dark:text-paper">{pendingStatus.name || pendingStatus.email}</span>{' '}
+                  will be signed out and blocked from logging in until reactivated.
+                </>
+              ) : (
+                <>
+                  <span className="font-semibold text-ink dark:text-paper">{pendingStatus.name || pendingStatus.email}</span>{' '}
+                  will be able to log in again.
+                </>
+              )}
+            </p>
+            <div className="flex gap-3">
+              <Button variant="secondary" onClick={() => setPendingStatus(null)} className="flex-1">
+                Cancel
+              </Button>
+              <Button onClick={() => void confirmPendingStatus()} className="flex-1">
+                {pendingStatus.status === 'active' ? 'Suspend user' : 'Reactivate user'}
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      <Modal
+        open={pendingRole !== null}
+        onClose={() => setPendingRole(null)}
+        title="Change role?"
+      >
+        {pendingRole && (
+          <div className="space-y-4">
+            <p className="text-sm text-muted">
+              Change <span className="font-semibold text-ink dark:text-paper">{pendingRole.p.name || pendingRole.p.email}</span>{' '}
+              from <span className="font-mono">{pendingRole.p.role}</span> to{' '}
+              <span className="font-mono">{pendingRole.role}</span>?
+              {pendingRole.role === 'admin' && ' Admins can read every profile and manage users.'}
+            </p>
+            <div className="flex gap-3">
+              <Button variant="secondary" onClick={() => setPendingRole(null)} className="flex-1">
+                Cancel
+              </Button>
+              <Button onClick={() => void confirmPendingRole()} className="flex-1">
+                Change role
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   )
 }
@@ -250,6 +319,8 @@ function DemoUsers() {
   const { pushToast } = useUI()
   const [query, setQuery] = useState('')
   const [tierFilter, setTierFilter] = useState('all')
+  const [pendingStatus, setPendingStatus] = useState<AdminUser | null>(null)
+  const [pendingTier, setPendingTier] = useState<{ u: AdminUser; tier: AdminUser['tier'] } | null>(null)
 
   const filtered = users.filter((u) => {
     const q = query.toLowerCase()
@@ -259,9 +330,22 @@ function DemoUsers() {
   })
 
   const toggleStatus = (u: AdminUser) => {
-    const next = u.status === 'active' ? 'suspended' : 'active'
-    updateUserStatus(u.id, next)
-    pushToast(next === 'suspended' ? 'User suspended' : 'User reactivated', u.name)
+    setPendingStatus(u)
+  }
+
+  const confirmPendingStatus = () => {
+    if (!pendingStatus) return
+    const next = pendingStatus.status === 'active' ? 'suspended' : 'active'
+    updateUserStatus(pendingStatus.id, next)
+    pushToast(next === 'suspended' ? 'User suspended' : 'User reactivated', pendingStatus.name)
+    setPendingStatus(null)
+  }
+
+  const confirmPendingTier = () => {
+    if (!pendingTier) return
+    updateUserTier(pendingTier.u.id, pendingTier.tier)
+    pushToast('Tier updated', `${pendingTier.u.name} → ${pendingTier.tier}`)
+    setPendingTier(null)
   }
 
   return (
@@ -310,10 +394,7 @@ function DemoUsers() {
                     <td className="px-4 py-3">
                       <Select
                         value={u.tier}
-                        onChange={(e) => {
-                          updateUserTier(u.id, e.target.value as AdminUser['tier'])
-                          pushToast('Tier updated', `${u.name} → ${e.target.value}`)
-                        }}
+                        onChange={(e) => setPendingTier({ u, tier: e.target.value as AdminUser['tier'] })}
                         aria-label={`Tier for ${u.name}`}
                         className="!w-auto !py-1 text-xs"
                       >
@@ -345,6 +426,57 @@ function DemoUsers() {
           </div>
         )}
       </Card>
+
+      <Modal
+        open={pendingStatus !== null}
+        onClose={() => setPendingStatus(null)}
+        title={pendingStatus && pendingStatus.status === 'active' ? 'Suspend user?' : 'Reactivate user?'}
+      >
+        {pendingStatus && (
+          <div className="space-y-4">
+            <p className="text-sm text-muted">
+              {pendingStatus.status === 'active' ? (
+                <>
+                  <span className="font-semibold text-ink dark:text-paper">{pendingStatus.name}</span> will be
+                  blocked from this demo until reactivated. This applies to simulated data only.
+                </>
+              ) : (
+                <>
+                  <span className="font-semibold text-ink dark:text-paper">{pendingStatus.name}</span> will be
+                  reactivated.
+                </>
+              )}
+            </p>
+            <div className="flex gap-3">
+              <Button variant="secondary" onClick={() => setPendingStatus(null)} className="flex-1">
+                Cancel
+              </Button>
+              <Button onClick={confirmPendingStatus} className="flex-1">
+                {pendingStatus.status === 'active' ? 'Suspend user' : 'Reactivate user'}
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      <Modal open={pendingTier !== null} onClose={() => setPendingTier(null)} title="Change tier?">
+        {pendingTier && (
+          <div className="space-y-4">
+            <p className="text-sm text-muted">
+              Change <span className="font-semibold text-ink dark:text-paper">{pendingTier.u.name}</span> from{' '}
+              {pendingTier.u.tier} to {pendingTier.tier}? This applies to simulated data only.
+            </p>
+            <div className="flex gap-3">
+              <Button variant="secondary" onClick={() => setPendingTier(null)} className="flex-1">
+                Cancel
+              </Button>
+              <Button onClick={confirmPendingTier} className="flex-1">
+                Change tier
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   )
 }

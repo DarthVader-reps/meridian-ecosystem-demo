@@ -1,5 +1,7 @@
-import { Badge, Button, Card } from '../../components/ui'
+import { useState } from 'react'
+import { Badge, Button, Card, Modal } from '../../components/ui'
 import { Page } from '../../components/layout'
+import { useRequireLogin } from '../../components/useRequireLogin'
 import { useTrading } from '../../store/trading'
 import { useUI } from '../../store/ui'
 import { formatPct } from '../../lib/market'
@@ -29,10 +31,19 @@ function riskTone(score: number): 'green' | 'amber' | 'red' {
 export default function CopyTrading() {
   const { copiedTraders, copyTrader, stopCopy } = useTrading()
   const pushToast = useUI((s) => s.pushToast)
+  const requireLogin = useRequireLogin()
+  const [pending, setPending] = useState<Trader | null>(null)
 
-  function handleCopy(t: Trader) {
-    copyTrader(t.id)
-    pushToast('Copying trader', `You are now copying ${t.name}. Simulated positions only.`)
+  function handleCopyClick(t: Trader) {
+    if (!requireLogin()) return
+    setPending(t)
+  }
+
+  function handleConfirmCopy() {
+    if (!pending) return
+    copyTrader(pending.id)
+    pushToast('Copying trader', `You are now copying ${pending.name}. Simulated positions only.`)
+    setPending(null)
   }
 
   function handleStop(t: Trader) {
@@ -90,7 +101,7 @@ export default function CopyTrading() {
                     Stop copying
                   </Button>
                 ) : (
-                  <Button className="w-full" onClick={() => handleCopy(t)}>
+                  <Button className="w-full" onClick={() => handleCopyClick(t)}>
                     Copy trader
                   </Button>
                 )}
@@ -102,6 +113,25 @@ export default function CopyTrading() {
       <p className="mt-6 text-sm text-muted">
         Past simulated performance is not a guarantee of future results. All trading in this demo is paper trading.
       </p>
+
+      <Modal open={pending !== null} onClose={() => setPending(null)} title={pending ? `Copy ${pending.name}?` : 'Copy trader'}>
+        {pending && (
+          <div className="space-y-4">
+            <p className="text-sm text-muted">
+              You will mirror {pending.name}'s simulated trades ({pending.strategy}) with demo funds.
+              This does not move real markets and you can stop copying at any time.
+            </p>
+            <div className="flex gap-3">
+              <Button variant="secondary" onClick={() => setPending(null)} className="flex-1">
+                Cancel
+              </Button>
+              <Button onClick={handleConfirmCopy} className="flex-1">
+                Start copying
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
     </Page>
   )
 }

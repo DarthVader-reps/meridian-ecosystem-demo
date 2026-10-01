@@ -36,6 +36,9 @@ function pushTx(transactions: Tx[], tx: Omit<Tx, 'id' | 'date'>): Tx[] {
   return [{ ...tx, id: uid('tx'), date: new Date().toISOString() }, ...transactions].slice(0, 200)
 }
 
+/** Round to 8 decimals so float artifacts (e.g. 0.1 + 0.2) never reach balances. */
+const round8 = (n: number) => Math.round(n * 1e8) / 1e8
+
 export const useWallet = create<WalletState>()(
   persist(
     (set, get) => ({
@@ -43,15 +46,15 @@ export const useWallet = create<WalletState>()(
       transactions: seedTransactions,
       deposit: (asset, amount, detail) =>
         set((s) => ({
-          balances: { ...s.balances, [asset]: (s.balances[asset] ?? 0) + amount },
-          transactions: pushTx(s.transactions, { type: 'deposit', asset, amount, detail }),
+          balances: { ...s.balances, [asset]: round8((s.balances[asset] ?? 0) + amount) },
+          transactions: pushTx(s.transactions, { type: 'deposit', asset, amount: round8(amount), detail }),
         })),
       withdraw: (asset, amount, detail) => {
         const bal = get().balances[asset] ?? 0
         if (amount <= 0 || amount > bal) return false
         set((s) => ({
-          balances: { ...s.balances, [asset]: bal - amount },
-          transactions: pushTx(s.transactions, { type: 'withdraw', asset, amount: -amount, detail }),
+          balances: { ...s.balances, [asset]: round8(bal - amount) },
+          transactions: pushTx(s.transactions, { type: 'withdraw', asset, amount: round8(-amount), detail }),
         }))
         return true
       },
@@ -61,13 +64,13 @@ export const useWallet = create<WalletState>()(
         set((s) => ({
           balances: {
             ...s.balances,
-            [fromAsset]: bal - amount,
-            [toAsset]: (s.balances[toAsset] ?? 0) + amount,
+            [fromAsset]: round8(bal - amount),
+            [toAsset]: round8((s.balances[toAsset] ?? 0) + amount),
           },
           transactions: pushTx(s.transactions, {
             type: 'transfer',
             asset: fromAsset,
-            amount: -amount,
+            amount: round8(-amount),
             detail: `Transfer ${fromAsset} → ${toAsset}`,
           }),
         }))
@@ -80,13 +83,13 @@ export const useWallet = create<WalletState>()(
         set((s) => ({
           balances: {
             ...s.balances,
-            [fromAsset]: bal - amount,
-            [toAsset]: (s.balances[toAsset] ?? 0) + received,
+            [fromAsset]: round8(bal - amount),
+            [toAsset]: round8((s.balances[toAsset] ?? 0) + received),
           },
           transactions: pushTx(s.transactions, {
             type: 'swap',
             asset: fromAsset,
-            amount: -amount,
+            amount: round8(-amount),
             detail: `Swap ${fromAsset} → ${toAsset} @ ${rate}`,
           }),
         }))

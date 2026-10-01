@@ -59,6 +59,7 @@ export const useTrading = create<TradingState>()(
       placeOrder: (symbol, side, qty, price) => {
         if (qty <= 0 || price <= 0) return false
         const cost = qty * price
+        const r8 = (n: number) => Math.round(n * 1e8) / 1e8
         if (side === 'buy') {
           if (cost > get().demoBalance) return false
           set((s) => {
@@ -66,14 +67,14 @@ export const useTrading = create<TradingState>()(
             const positions = existing
               ? s.positions.map((p) =>
                   p.symbol === symbol
-                    ? { ...p, qty: p.qty + qty, avgPrice: (p.qty * p.avgPrice + cost) / (p.qty + qty) }
+                    ? { ...p, qty: r8(p.qty + qty), avgPrice: (p.qty * p.avgPrice + cost) / (p.qty + qty) }
                     : p,
                 )
-              : [...s.positions, { symbol, qty, avgPrice: price }]
+              : [...s.positions, { symbol, qty: r8(qty), avgPrice: price }]
             return {
-              demoBalance: s.demoBalance - cost,
+              demoBalance: r8(s.demoBalance - cost),
               positions,
-              orders: [{ id: uid('ord'), symbol, side, qty, price, date: new Date().toISOString() }, ...s.orders].slice(0, 200),
+              orders: [{ id: uid('ord'), symbol, side, qty: r8(qty), price, date: new Date().toISOString() }, ...s.orders].slice(0, 200),
             }
           })
           return true
@@ -81,11 +82,11 @@ export const useTrading = create<TradingState>()(
         const existing = get().positions.find((p) => p.symbol === symbol)
         if (!existing || qty > existing.qty) return false
         set((s) => ({
-          demoBalance: s.demoBalance + cost,
+          demoBalance: r8(s.demoBalance + cost),
           positions: s.positions
-            .map((p) => (p.symbol === symbol ? { ...p, qty: p.qty - qty } : p))
+            .map((p) => (p.symbol === symbol ? { ...p, qty: r8(p.qty - qty) } : p))
             .filter((p) => p.qty > 0.000001),
-          orders: [{ id: uid('ord'), symbol, side, qty, price, date: new Date().toISOString() }, ...s.orders].slice(0, 200),
+          orders: [{ id: uid('ord'), symbol, side, qty: r8(qty), price, date: new Date().toISOString() }, ...s.orders].slice(0, 200),
         }))
         return true
       },

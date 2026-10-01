@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { HashRouter, Route, Routes, useLocation } from 'react-router-dom'
+import { HashRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { DemoBar, Navbar, Footer, Breadcrumbs } from './components/layout'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { Toasts } from './components/ui'
@@ -88,6 +88,11 @@ function Shell() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/dashboard" element={<RequireAuth><Dashboard /></RequireAuth>} />
+          {/* Hub shortcuts: breadcrumbs and deep links point here; redirect to a real page. */}
+          <Route path="/invest" element={<Navigate to="/invest/plans" replace />} />
+          <Route path="/trading" element={<Navigate to="/trading/demo" replace />} />
+          <Route path="/wallet" element={<Navigate to="/wallet/deposit" replace />} />
+          <Route path="/account" element={<Navigate to="/account/profile" replace />} />
           <Route path="/invest/plans" element={<PlansPage />} />
           <Route path="/invest/stocks" element={<StocksPage />} />
           <Route path="/invest/stocks/:symbol" element={<StockDetail />} />

@@ -7,7 +7,15 @@ import DataSourceBadge from '../../components/DataSourceBadge'
 export default function Settings() {
   const { settings, updateSettings, resetDemo, log } = useAdmin()
   const { pushToast } = useUI()
-  const [form, setForm] = useState({ ...settings })
+  // Normalize money fields to 2 decimals: guards against float artifacts
+  // (e.g. 0.10000000149011612) that can arrive from persisted or typed values.
+  const round2 = (n: number) => Math.round(n * 100) / 100
+  const [form, setForm] = useState(() => ({
+    ...settings,
+    tradingFeePct: round2(settings.tradingFeePct),
+    withdrawalFeeUSD: round2(settings.withdrawalFeeUSD),
+    minDepositUSD: round2(settings.minDepositUSD),
+  }))
   const [confirmReset, setConfirmReset] = useState(false)
 
   const save = () => {
@@ -53,13 +61,13 @@ export default function Settings() {
         <h3 className="text-base font-semibold text-ink dark:text-paper">Fees & limits</h3>
         <div className="mt-4 grid gap-4 sm:grid-cols-3">
           <Field label="Trading fee %" htmlFor="set-fee">
-            <Input id="set-fee" type="number" min="0" step="0.01" value={form.tradingFeePct} onChange={(e) => set('tradingFeePct', Number(e.target.value))} />
+            <Input id="set-fee" type="number" min="0" step="0.01" value={form.tradingFeePct} onChange={(e) => set('tradingFeePct', round2(Number(e.target.value)))} />
           </Field>
           <Field label="Withdrawal fee (USD)" htmlFor="set-wfee">
-            <Input id="set-wfee" type="number" min="0" step="0.01" value={form.withdrawalFeeUSD} onChange={(e) => set('withdrawalFeeUSD', Number(e.target.value))} />
+            <Input id="set-wfee" type="number" min="0" step="0.01" value={form.withdrawalFeeUSD} onChange={(e) => set('withdrawalFeeUSD', round2(Number(e.target.value)))} />
           </Field>
           <Field label="Min deposit (USD)" htmlFor="set-mindep">
-            <Input id="set-mindep" type="number" min="0" value={form.minDepositUSD} onChange={(e) => set('minDepositUSD', Number(e.target.value))} />
+            <Input id="set-mindep" type="number" min="0" value={form.minDepositUSD} onChange={(e) => set('minDepositUSD', round2(Number(e.target.value)))} />
           </Field>
         </div>
         <div className="mt-6">

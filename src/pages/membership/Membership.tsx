@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Page } from '../../components/layout'
 import { Badge, Button, Card, LoadingState } from '../../components/ui'
+import { useRequireLogin } from '../../components/useRequireLogin'
 import { useMembership, type MemberTier } from '../../store/membership'
 import { useUI } from '../../store/ui'
 import { formatMoney } from '../../lib/market'
@@ -35,6 +36,7 @@ export default function MembershipPage() {
   const tier = useMembership((s) => s.tier)
   const setTier = useMembership((s) => s.setTier)
   const pushToast = useUI((s) => s.pushToast)
+  const requireLogin = useRequireLogin()
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -43,6 +45,7 @@ export default function MembershipPage() {
   }, [])
 
   const choose = (t: Tier) => {
+    if (!requireLogin()) return
     setTier(t.id as MemberTier)
     pushToast('Membership updated', `You are now on ${t.name}.`)
   }

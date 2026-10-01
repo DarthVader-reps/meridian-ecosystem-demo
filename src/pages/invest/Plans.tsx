@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Page } from '../../components/layout'
 import { Badge, Button, Card, Field, Input, LoadingState, Modal } from '../../components/ui'
+import { useRequireLogin } from '../../components/useRequireLogin'
 import { usePortfolio } from '../../store/portfolio'
 import { useUI } from '../../store/ui'
 import { formatMoney } from '../../lib/market'
@@ -35,6 +36,7 @@ export default function PlansPage() {
   const [confirmed, setConfirmed] = useState(false)
   const startPlan = usePortfolio((s) => s.startPlan)
   const pushToast = useUI((s) => s.pushToast)
+  const requireLogin = useRequireLogin()
 
   useEffect(() => {
     const t = setTimeout(() => setReady(true), 500)
@@ -42,6 +44,7 @@ export default function PlansPage() {
   }, [])
 
   const openPlan = (plan: Plan) => {
+    if (!requireLogin()) return
     setActive(plan)
     setAmount('')
     setError(undefined)
