@@ -1,0 +1,106 @@
+import { create } from 'zustand'
+import { getAuthAdapter, type AuthUser } from '../lib/auth'
+import { useWallet } from './wallet'
+import { usePortfolio } from './portfolio'
+import { useMembership } from './membership'
+
+interface UserSnapshot {
+  wallet: { balances: Record<string, number>; transactions: unknown[] }
+  portfolio: { holdings: unknown[]; plans: unknown[] }
+  membership: { tier: unknown; vip: unknown; giveawayEntries: string[] }
+}
+
+function snapshotKey(userId: string) {
+  return `meridian-demo-snapshot.${userId}`
+}
+
+function takeSnapshot(userId: string) {
+  const w = useWallet.getState()
+  const p = usePortfolio.getState()
+  const m = useMembership.getState()
+  const snapshot: UserSnapshot = {
+    wallet: { balances: w.balances, transactions: w.transactions },
+    portfolio: { holdings: p.holdings, plans: p.plans },
+    membership: { tier: m.tier, vip: m.vip, giveawayEntries: m.giveawayEntries },
+  }
+  try {
+    localStorage.setItem(snapshotKey(userId), JSON.stringify(snapshot))
+  } catch {
+    /* storage full — skip */
+  }
+}
+
+function restoreSnapshot(userId: string): boolean {
+  try {
+    const raw = localStorage.getItem(snapshotKey(userId))
+    if (!raw) return false
+    const s = JSON.parse(raw) as UserSnapshot
+    useWallet.setState({ balances: s.wallet.balances, transactions: s.wallet.transactions as never })
+    usePortfolio.setState({ holdings: s.portfolio.holdings as never, plans: s.portfolio.plans as never })
+    useMembership.setState({ tier: s.membership.tier as never, vip: s.membership.vip as never, giveawayEntries: s.membership.giveawayEntries })
+    return true
+  } catch {
+    return false
+  }
+}
+
+function resetToSeed() {
+  useWallet.getState().reset()
+  usePortfolio.getState().reset()
+  useMembership.setState({ tier: 'standard', vip: 'none', giveawayEntries: [] })
+}
+
+interface AuthState {
+  user: AuthUser | null
+  initialized: boolean
+  busy: boolean
+  init: () => void
+  signUp: (name: string, email: string, password: string) => Promise<string | null>
+  signIn: (email: string, password: string) => Promise<string | null>
+  signOut: () => Promise<void>
+}
+
+export const useAuth = create<AuthState>()((set, get) => ({
+  user: null,
+  initialized: false,
+  busy: false,
+
+  init: () => {
+    if (get().initialized) return
+    set({ user: getAuthAdapter().getSession(), initialized: true })
+  },
+
+  signUp: async (name, email, password) => {
+    set({ busy: true })
+    try {
+      const { user, error } = await getAuthAdapter().signUp(name, email, password)
+      if (error || !user) return error ?? 'Sign up failed.'
+      resetToSeed()
+      set({ user })
+      return null
+    } finally {
+      set({ busy: false })
+    }
+  },
+
+  signIn: async (email, password) => {
+    set({ busy: true })
+    try {
+      const { user, error } = await getAuthAdapter().signIn(email, password)
+      if (error || !user) return error ?? 'Sign in failed.'
+      if (!restoreSnapshot(user.id)) resetToSeed()
+      set({ user })
+      return null
+    } finally {
+      set({ busy: false })
+    }
+  },
+
+  signOut: async () => {
+    const { user } = get()
+    if (user) takeSnapshot(user.id)
+    await getAuthAdapter().signOut()
+    resetToSeed()
+    set({ user: null })
+  },
+}))

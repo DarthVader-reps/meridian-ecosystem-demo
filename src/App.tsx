@@ -6,6 +6,10 @@ import { Toasts } from './components/ui'
 import { useUI } from './store/ui'
 import Home from './pages/Home'
 import Dashboard from './pages/Dashboard'
+import Login from './pages/auth/Login'
+import Signup from './pages/auth/Signup'
+import { RequireAuth } from './components/RequireAuth'
+import { useAuth } from './store/auth'
 import NotFound from './pages/NotFound'
 import PlansPage from './pages/invest/Plans'
 import StocksPage from './pages/invest/Stocks'
@@ -60,6 +64,10 @@ function ScrollToTop() {
 function Shell() {
   const { theme } = useUI()
   const { pathname } = useLocation()
+  const init = useAuth((s) => s.init)
+  useEffect(() => {
+    init()
+  }, [init])
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark')
   }, [theme])
@@ -73,7 +81,9 @@ function Shell() {
       <main className="flex-1">
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/dashboard" element={<RequireAuth><Dashboard /></RequireAuth>} />
           <Route path="/invest/plans" element={<PlansPage />} />
           <Route path="/invest/stocks" element={<StocksPage />} />
           <Route path="/invest/stocks/:symbol" element={<StockDetail />} />

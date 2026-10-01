@@ -3,6 +3,7 @@ import { Link, NavLink, useLocation } from 'react-router-dom'
 import { BRAND, DEMO_DISCLAIMER } from '../config/brand'
 import { useUI } from '../store/ui'
 import { useAdmin } from '../store/admin'
+import { useAuth } from '../store/auth'
 import { cn } from '../lib/cn'
 
 /* ---------- Persistent demo bar ---------- */
@@ -24,6 +25,73 @@ export function DemoBar() {
         </div>
       )}
     </>
+  )
+}
+
+/* ---------- Auth nav ---------- */
+
+function AuthNav({ light }: { light?: boolean }) {
+  const { user, initialized, signOut } = useAuth()
+  if (!initialized) return null
+  const linkCls = cn(
+    'rounded-lg px-3 py-1.5 text-sm font-medium',
+    light ? 'text-white hover:bg-white/10' : 'text-ink dark:text-paper hover:bg-mist dark:hover:bg-ink-soft',
+  )
+  if (!user) {
+    return (
+      <div className="hidden items-center gap-1 sm:flex">
+        <Link to="/login" className={linkCls}>Log in</Link>
+        <Link
+          to="/signup"
+          className="rounded-lg bg-[var(--color-accent)] px-3 py-1.5 text-sm font-semibold text-white hover:opacity-90"
+        >
+          Sign up
+        </Link>
+      </div>
+    )
+  }
+  return (
+    <div className="hidden items-center gap-1 sm:flex">
+      <Link to="/dashboard" className={linkCls} title="Your dashboard">
+        {user.name.split(' ')[0]}
+      </Link>
+      <button
+        onClick={() => void signOut()}
+        className={cn(linkCls, 'cursor-pointer')}
+      >
+        Log out
+      </button>
+    </div>
+  )
+}
+
+function MobileAuthNav({ onNavigate }: { onNavigate: () => void }) {
+  const { user, initialized, signOut } = useAuth()
+  if (!initialized) return null
+  if (!user) {
+    return (
+      <div className="flex gap-2 border-b border-line py-3 dark:border-[#2a2a2d]">
+        <Link to="/login" onClick={onNavigate} className="flex-1 rounded-lg border border-line px-3 py-2 text-center text-sm font-medium text-ink dark:border-[#2a2a2d] dark:text-paper">
+          Log in
+        </Link>
+        <Link to="/signup" onClick={onNavigate} className="flex-1 rounded-lg bg-[var(--color-accent)] px-3 py-2 text-center text-sm font-semibold text-white">
+          Sign up
+        </Link>
+      </div>
+    )
+  }
+  return (
+    <div className="flex items-center justify-between gap-2 border-b border-line py-3 dark:border-[#2a2a2d]">
+      <Link to="/dashboard" onClick={onNavigate} className="text-sm font-semibold text-ink dark:text-paper">
+        {user.name}
+      </Link>
+      <button
+        onClick={() => { void signOut(); onNavigate() }}
+        className="rounded-lg border border-line px-3 py-1.5 text-sm text-muted dark:border-[#2a2a2d] cursor-pointer"
+      >
+        Log out
+      </button>
+    </div>
   )
 }
 
@@ -174,6 +242,7 @@ export function Navbar({ overlay }: { overlay?: boolean }) {
         </ul>
 
         <div className="flex items-center gap-2">
+          <AuthNav light={light} />
           <button
             onClick={toggleTheme}
             aria-label={theme === 'light' ? 'Switch to dark theme' : 'Switch to light theme'}
@@ -198,6 +267,7 @@ export function Navbar({ overlay }: { overlay?: boolean }) {
       {/* Mobile drawer */}
       {open && (
         <div className="max-h-[70vh] overflow-y-auto border-t border-line dark:border-[#2a2a2d] bg-paper dark:bg-ink px-4 pb-6 pt-2 lg:hidden">
+          <MobileAuthNav onNavigate={() => setOpen(false)} />
           {NAV_GROUPS.map((g) => (
             <div key={g.label} className="border-b border-line dark:border-[#2a2a2d] last:border-0">
               <button
