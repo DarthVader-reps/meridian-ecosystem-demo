@@ -90,6 +90,8 @@ const seedUsers: AdminUser[] = [
 interface AdminState {
   isAdmin: boolean
   login: (pin: string) => boolean
+  /** Grants console access without a PIN (used for admin-role user sessions). */
+  grant: () => void
   logout: () => void
 
   users: AdminUser[]
@@ -152,6 +154,11 @@ export const useAdmin = create<AdminState>()(
         return false
       },
       logout: () => set({ isAdmin: false }),
+      grant: () =>
+        set((s) => ({
+          isAdmin: true,
+          activity: [toActivity('Admin login', 'Signed in via admin user session'), ...s.activity].slice(0, 200),
+        })),
 
       users: seedUsers,
       updateUserStatus: (id, status) =>

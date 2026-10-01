@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useAdmin, type AdminUser } from '../../store/admin'
 import { useUI } from '../../store/ui'
 import { Card, SectionHeader, Badge, Input, Select, Button, EmptyState } from '../../components/ui'
+import DataSourceBadge from '../../components/DataSourceBadge'
 import { isSupabaseConfigured } from '../../config/supabase'
 import {
   fetchProfiles,
@@ -152,7 +153,7 @@ function SupabaseUsers() {
           className="max-w-xs"
           aria-label="Search users"
         />
-        <Badge tone="green">Live Supabase data</Badge>
+        <DataSourceBadge live />
       </div>
 
       <Card className="!p-0 overflow-hidden">

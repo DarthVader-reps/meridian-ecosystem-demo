@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useAdmin } from '../../store/admin'
 import { useUI } from '../../store/ui'
 import { Card, SectionHeader, Button, Input, Field, Toggle } from '../../components/ui'
+import DataSourceBadge from '../../components/DataSourceBadge'
 
 export default function Settings() {
   const { settings, updateSettings, resetDemo, log } = useAdmin()
@@ -27,7 +28,10 @@ export default function Settings() {
 
   return (
     <div className="space-y-8">
-      <SectionHeader title="Settings" body="Platform-wide demo configuration. Changes apply to simulated behavior only." />
+      <div className="flex items-start justify-between gap-4">
+        <SectionHeader title="Settings" body="Platform-wide demo configuration. Changes apply to simulated behavior only." />
+        <DataSourceBadge live={false} />
+      </div>
 
       <Card>
         <h3 className="text-base font-semibold text-ink dark:text-paper">General</h3>

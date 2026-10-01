@@ -3,6 +3,7 @@ import { useAdmin, type AdminVehicle } from '../../store/admin'
 import { useUI } from '../../store/ui'
 import { uid } from '../../lib/market'
 import { Card, SectionHeader, Badge, Button, Input, Select, Field, Modal, EmptyState } from '../../components/ui'
+import DataSourceBadge from '../../components/DataSourceBadge'
 
 const EMPTY: AdminVehicle = {
   id: '',
@@ -54,7 +55,10 @@ export default function Vehicles() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <SectionHeader title="Vehicles" body={`${vehicles.length} fictional vehicles in inventory.`} />
-        <Button onClick={openNew}>Add vehicle</Button>
+        <div className="flex items-center gap-3">
+          <DataSourceBadge live={false} />
+          <Button onClick={openNew}>Add vehicle</Button>
+        </div>
       </div>
 
       <Card className="!p-0 overflow-hidden">

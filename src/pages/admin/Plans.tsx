@@ -3,6 +3,7 @@ import { useAdmin, type AdminPlan } from '../../store/admin'
 import { useUI } from '../../store/ui'
 import { uid } from '../../lib/market'
 import { Card, SectionHeader, Badge, Button, Input, Select, Field, Modal, EmptyState } from '../../components/ui'
+import DataSourceBadge from '../../components/DataSourceBadge'
 
 const EMPTY: AdminPlan = {
   id: '',
@@ -53,7 +54,10 @@ export default function Plans() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <SectionHeader title="Investment plans" body={`${plans.length} plans. Returns shown are simulated ranges, never guarantees.`} />
-        <Button onClick={openNew}>Add plan</Button>
+        <div className="flex items-center gap-3">
+          <DataSourceBadge live={false} />
+          <Button onClick={openNew}>Add plan</Button>
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">

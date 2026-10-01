@@ -1,13 +1,33 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAdmin, ADMIN_PIN } from '../../store/admin'
 import { Button, Card, Field, Input, SectionHeader } from '../../components/ui'
+import { isSupabaseConfigured } from '../../config/supabase'
+import { getAdminAccess } from '../../lib/supabaseAdmin'
 
 export default function AdminGate() {
-  const { login } = useAdmin()
+  const { isAdmin, login, grant } = useAdmin()
   const navigate = useNavigate()
   const [pin, setPin] = useState('')
   const [error, setError] = useState('')
+  const [checking, setChecking] = useState(isSupabaseConfigured && !isAdmin)
+
+  // If the operator is already logged in as an admin-role user, skip the PIN.
+  useEffect(() => {
+    if (!isSupabaseConfigured || isAdmin) return
+    let cancelled = false
+    getAdminAccess().then((res) => {
+      if (cancelled) return
+      setChecking(false)
+      if (res.access === 'ready') {
+        grant()
+        navigate('/admin', { replace: true })
+      }
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [isAdmin, grant, navigate])
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -17,6 +37,14 @@ export default function AdminGate() {
       setError('Incorrect PIN. Try again.')
       setPin('')
     }
+  }
+
+  if (checking) {
+    return (
+      <div className="mx-auto max-w-md px-4 py-20 sm:px-6">
+        <Card><p className="py-6 text-center text-sm text-muted">Checking your admin session…</p></Card>
+      </div>
+    )
   }
 
   return (
@@ -49,6 +77,9 @@ export default function AdminGate() {
         </form>
       </Card>
       <p className="mt-6 text-center text-xs text-muted">
+        Signed in as an admin user? You'll skip this step automatically.
+      </p>
+      <p className="mt-2 text-center text-xs text-muted">
         This is a front-end demo. Admin actions modify simulated data in your browser only.
       </p>
     </div>

@@ -3,6 +3,7 @@ import { useAdmin, type AdminGiveaway } from '../../store/admin'
 import { useUI } from '../../store/ui'
 import { uid } from '../../lib/market'
 import { Card, SectionHeader, Badge, Button, Input, Select, Field, Modal, EmptyState } from '../../components/ui'
+import DataSourceBadge from '../../components/DataSourceBadge'
 
 const EMPTY: AdminGiveaway = { id: '', title: '', prize: '', entries: 0, status: 'active', endsIn: '7 days' }
 
@@ -77,7 +78,10 @@ export default function Giveaways() {
     <div className="space-y-8">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <SectionHeader title="Giveaways" body="Create draws, edit prizes, and pick winners from demo entries." />
-        <Button onClick={openNew}>New giveaway</Button>
+        <div className="flex items-center gap-3">
+          <DataSourceBadge live={false} />
+          <Button onClick={openNew}>New giveaway</Button>
+        </div>
       </div>
 
       <section>

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useAdmin, type AdminAsset } from '../../store/admin'
 import { useUI } from '../../store/ui'
 import { Card, SectionHeader, Badge, Button, Input, Select, Field, Modal, EmptyState } from '../../components/ui'
+import DataSourceBadge from '../../components/DataSourceBadge'
 
 const EMPTY: AdminAsset = { symbol: '', name: '', price: 0, changePct: 0, type: 'stock', sector: '', currency: 'USD' }
 
@@ -44,7 +45,10 @@ export default function Assets() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <SectionHeader title="Assets" body={`${assets.length} tradeable assets. Add, edit, or remove listings.`} />
-        <Button onClick={openNew}>Add asset</Button>
+        <div className="flex items-center gap-3">
+          <DataSourceBadge live={false} />
+          <Button onClick={openNew}>Add asset</Button>
+        </div>
       </div>
 
       <Card className="!p-0 overflow-hidden">

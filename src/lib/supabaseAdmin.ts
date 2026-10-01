@@ -77,3 +77,125 @@ export async function updateProfileStatus(
     return e instanceof Error ? e.message : 'Failed to update status.'
   }
 }
+
+// ---------------------------------------------------------------------------
+// Platform-wide ledger + dashboard stats (admin only; enforced by RLS)
+// ---------------------------------------------------------------------------
+
+export interface SupabaseTransaction {
+  id: string
+  user_id: string
+  type: 'deposit' | 'withdraw' | 'transfer' | 'swap' | 'trade'
+  asset: string
+  amount: number
+  detail: string | null
+  created_at: string
+  /** Resolved from profiles in code (no FK join available to PostgREST). */
+  userLabel: string
+}
+
+export function profileLabel(p: Pick<SupabaseProfile, 'name' | 'email'> | undefined): string {
+  if (!p) return 'Unknown user'
+  return p.name?.trim() || p.email || 'Unknown user'
+}
+
+/** Pure helper: attach a display label to every transaction. Exported for tests. */
+export function labelTransactions(
+  txs: Array<Omit<SupabaseTransaction, 'userLabel'>>,
+  profiles: SupabaseProfile[],
+): SupabaseTransaction[] {
+  const byId = new Map(profiles.map((p) => [p.id, p]))
+  return txs.map((t) => ({ ...t, userLabel: profileLabel(byId.get(t.user_id)) }))
+}
+
+export interface AdminDashboardStats {
+  totalUsers: number
+  activeUsers: number
+  suspendedUsers: number
+  adminCount: number
+  signupsLast7d: number
+  totalTransactions: number
+  recent: SupabaseTransaction[]
+  /** Buckets for the last 7 days, oldest first: { day: 'Mon', signups: n }. */
+  signupSeries: Array<{ day: string; signups: number }>
+  /** Transaction counts by type. */
+  txTypeSeries: Array<{ type: string; count: number }>
+}
+
+/** Pure helper: compute dashboard stats from fetched rows. Exported for tests. */
+export function computeDashboardStats(
+  profiles: SupabaseProfile[],
+  txs: SupabaseTransaction[],
+  now = new Date(),
+): AdminDashboardStats {
+  const totalUsers = profiles.length
+  const activeUsers = profiles.filter((p) => p.status === 'active').length
+  const suspendedUsers = profiles.filter((p) => p.status === 'suspended').length
+  const adminCount = profiles.filter((p) => p.role === 'admin').length
+
+  const weekAgo = now.getTime() - 7 * 86400000
+  const signupsLast7d = profiles.filter((p) => new Date(p.created_at).getTime() >= weekAgo).length
+
+  const signupSeries: Array<{ day: string; signups: number }> = []
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(now.getTime() - i * 86400000)
+    const key = d.toISOString().slice(0, 10)
+    const signups = profiles.filter((p) => p.created_at.slice(0, 10) === key).length
+    signupSeries.push({ day: d.toLocaleDateString(undefined, { weekday: 'short' }), signups })
+  }
+
+  const txTypeMap = new Map<string, number>()
+  for (const t of txs) txTypeMap.set(t.type, (txTypeMap.get(t.type) ?? 0) + 1)
+  const txTypeSeries = [...txTypeMap.entries()]
+    .map(([type, count]) => ({ type, count }))
+    .sort((a, b) => b.count - a.count)
+
+  return {
+    totalUsers,
+    activeUsers,
+    suspendedUsers,
+    adminCount,
+    signupsLast7d,
+    totalTransactions: txs.length,
+    recent: txs.slice(0, 8),
+    signupSeries,
+    txTypeSeries,
+  }
+}
+
+export async function fetchAllTransactions(
+  limit = 500,
+): Promise<{ transactions: SupabaseTransaction[]; error: string | null }> {
+  try {
+    const client = requireClient()
+    const [{ data: txData, error: txError }, { profiles, error: pError }] = await Promise.all([
+      client
+        .from('transactions')
+        .select('id,user_id,type,asset,amount,detail,created_at')
+        .order('created_at', { ascending: false })
+        .limit(limit),
+      fetchProfiles(),
+    ])
+    if (txError) return { transactions: [], error: txError.message }
+    if (pError) return { transactions: [], error: pError }
+    const raw = (txData ?? []) as Array<Omit<SupabaseTransaction, 'userLabel'>>
+    return { transactions: labelTransactions(raw, profiles), error: null }
+  } catch (e) {
+    return { transactions: [], error: e instanceof Error ? e.message : 'Failed to load transactions.' }
+  }
+}
+
+export async function fetchAdminDashboardStats(): Promise<{
+  stats: AdminDashboardStats | null
+  error: string | null
+}> {
+  try {
+    const { transactions, error } = await fetchAllTransactions(1000)
+    if (error) return { stats: null, error }
+    const { profiles, error: pError } = await fetchProfiles()
+    if (pError) return { stats: null, error: pError }
+    return { stats: computeDashboardStats(profiles, transactions), error: null }
+  } catch (e) {
+    return { stats: null, error: e instanceof Error ? e.message : 'Failed to load dashboard stats.' }
+  }
+}
