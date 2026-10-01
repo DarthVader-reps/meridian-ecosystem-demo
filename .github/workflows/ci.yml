@@ -1,0 +1,21 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          # Must match the node version in .github/workflows/deploy.yml (24).
+          # npm 10 (node 20) crashes on this lockfile-less tree.
+          node-version: 24
+      - run: npm install
+      - run: npx vitest run
+      - run: npx oxlint
+      - run: npm run build
