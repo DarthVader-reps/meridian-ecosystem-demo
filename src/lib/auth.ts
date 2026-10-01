@@ -26,6 +26,8 @@ export interface AuthAdapter {
   signIn(email: string, password: string): Promise<AuthResult>
   signOut(): Promise<void>
   getSession(): Promise<AuthUser | null>
+  /** Sends a password-reset email. Returns { error } — null on success. */
+  resetPassword(email: string): Promise<{ error: string | null }>
 }
 
 interface StoredUser extends AuthUser {
@@ -114,6 +116,10 @@ export const demoAdapter: AuthAdapter = {
     if (!id) return null
     const found = readUsers().find((u) => u.id === id)
     return found ? toAuthUser(found) : null
+  },
+
+  async resetPassword() {
+    return { error: 'Password reset needs the Supabase backend — demo accounts live in this browser only.' }
   },
 }
 

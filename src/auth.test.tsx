@@ -88,11 +88,35 @@ describe('useAuth store', () => {
       signIn: async () => ({ user: null, error: 'nope' }),
       signOut: async () => {},
       getSession: async () => null,
+      resetPassword: async () => ({ error: null }),
     }
     setAuthAdapter(fake)
     const err = await useAuth.getState().signUp('A', 'a@b.com', 'password123')
     expect(err).toBeNull()
     expect(useAuth.getState().user?.id).toBe('x')
     setAuthAdapter(demoAdapter)
+  })
+
+  it('demo adapter explains resetPassword is unavailable', async () => {
+    const { error } = await demoAdapter.resetPassword('alex@example.com')
+    expect(error).toMatch(/Supabase/)
+  })
+
+  it('store resetPassword returns null on success', async () => {
+    const fake = {
+      signUp: async () => ({ user: null, error: 'nope' }),
+      signIn: async () => ({ user: null, error: 'nope' }),
+      signOut: async () => {},
+      getSession: async () => null,
+      resetPassword: async () => ({ error: null }),
+    }
+    setAuthAdapter(fake)
+    expect(await useAuth.getState().resetPassword('a@b.com')).toBeNull()
+    setAuthAdapter(demoAdapter)
+  })
+
+  it('store resetPassword surfaces adapter errors', async () => {
+    const err = await useAuth.getState().resetPassword('alex@example.com')
+    expect(err).toMatch(/Supabase/)
   })
 })

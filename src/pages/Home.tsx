@@ -56,10 +56,12 @@ export default function Home() {
           className="absolute inset-0 h-full w-full object-cover"
           src={`${BASE}media/hero-car.mp4`}
           autoPlay
-          muted
           loop
           playsInline
           aria-hidden="true"
+          ref={(el) => {
+            if (el) el.muted = true
+          }}
         />
         <div className="absolute inset-0 bg-black/45" aria-hidden="true" />
         <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black/60 to-transparent" aria-hidden="true" />

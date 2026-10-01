@@ -34,6 +34,13 @@ export default function AdminLayout() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+      {settings.maintenanceMode && (
+        <div className="mb-6 rounded-xl bg-amber-500 px-4 py-2.5 text-center" role="alert" aria-label="Maintenance mode notice">
+          <p className="text-xs font-semibold tracking-wide text-white">
+            Maintenance mode is on — user-facing demo actions show a paused banner.
+          </p>
+        </div>
+      )}
       <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-widest text-[var(--color-accent)]">Admin console</p>

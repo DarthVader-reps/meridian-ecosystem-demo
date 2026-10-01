@@ -8,6 +8,8 @@ import Home from './pages/Home'
 import Dashboard from './pages/Dashboard'
 import Login from './pages/auth/Login'
 import Signup from './pages/auth/Signup'
+import ForgotPassword from './pages/auth/ForgotPassword'
+import ResetPassword from './pages/auth/ResetPassword'
 import { RequireAuth } from './components/RequireAuth'
 import { useAuth } from './store/auth'
 import NotFound from './pages/NotFound'
@@ -83,6 +85,8 @@ function Shell() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/dashboard" element={<RequireAuth><Dashboard /></RequireAuth>} />
           <Route path="/invest/plans" element={<PlansPage />} />
           <Route path="/invest/stocks" element={<StocksPage />} />

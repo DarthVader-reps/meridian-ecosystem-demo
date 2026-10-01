@@ -49,7 +49,18 @@ export const supabaseAdapter: AuthAdapter = {
       password,
     })
     if (error) return { user: null, error: error.message }
-    return { user: data.user ? toAuthUser(data.user) : null, error: null }
+    if (!data.user) return { user: null, error: 'Sign in failed.' }
+    // Enforce admin suspension: a suspended profile cannot start a session.
+    const { data: profile } = await client
+      .from('profiles')
+      .select('status')
+      .eq('id', data.user.id)
+      .single()
+    if (profile?.status === 'suspended') {
+      await client.auth.signOut()
+      return { user: null, error: 'This account has been suspended. Contact support.' }
+    }
+    return { user: toAuthUser(data.user), error: null }
   },
 
   async signOut(): Promise<void> {
@@ -60,6 +71,36 @@ export const supabaseAdapter: AuthAdapter = {
     const { data } = await requireClient().auth.getSession()
     return data.session?.user ? toAuthUser(data.session.user) : null
   },
+
+  async resetPassword(email: string): Promise<{ error: string | null }> {
+    const client = requireClient()
+    const cleanEmail = email.trim().toLowerCase()
+    if (!cleanEmail) return { error: 'Please enter your email address.' }
+    const redirectTo = `${window.location.origin}${import.meta.env.BASE_URL}#/reset-password`
+    const { error } = await client.auth.resetPasswordForEmail(cleanEmail, { redirectTo })
+    if (error) return { error: error.message }
+    return { error: null }
+  },
+}
+
+/**
+ * Extracts Supabase recovery tokens from the URL hash.
+ *
+ * The recovery email links to `<site>/#/reset-password#access_token=…&refresh_token=…&type=recovery`
+ * (note the double `#` — one from HashRouter, one from Supabase). Returns the
+ * tokens, or null when the link is missing, malformed, or not a recovery link.
+ */
+export function parseRecoveryTokens(
+  hash: string,
+): { access_token: string; refresh_token: string } | null {
+  const fragment = hash.split('#').slice(2).join('#')
+  if (!fragment) return null
+  const params = new URLSearchParams(fragment)
+  if (params.get('type') !== 'recovery') return null
+  const access_token = params.get('access_token')
+  const refresh_token = params.get('refresh_token')
+  if (!access_token || !refresh_token) return null
+  return { access_token, refresh_token }
 }
 
 /* Auto-swap: when Supabase is configured, it replaces the demo adapter for the

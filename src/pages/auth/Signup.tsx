@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { Page } from '../../components/layout'
+import AuthLabel from '../../components/AuthLabel'
 import { Button, Card, Input } from '../../components/ui'
 import { useAuth } from '../../store/auth'
 
@@ -80,7 +81,7 @@ export default function Signup() {
             Already have an account? <Link to="/login" className="font-medium text-[var(--color-accent)] hover:underline">Log in</Link>
           </p>
         </Card>
-        <p className="mt-4 text-center text-xs text-muted">Demo auth — accounts live in this browser only. No real money involved.</p>
+        <AuthLabel suffix="No real money involved." />
       </div>
     </Page>
   )

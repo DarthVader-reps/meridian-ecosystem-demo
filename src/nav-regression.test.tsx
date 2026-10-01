@@ -1,0 +1,43 @@
+import { describe, it, expect } from 'vitest'
+import { render, screen, fireEvent, act } from '@testing-library/react'
+import App from './App'
+
+// Regression test for the reported "blank page on in-app navigation" issue:
+// render once, then navigate client-side several times; the shell
+// (demo bar, nav) must never disappear.
+describe('in-app hash navigation', () => {
+  it('keeps rendering the shell across client-side navigations', async () => {
+    window.location.hash = '#/'
+    const { container, unmount } = render(<App />)
+    expect(screen.getByText(/Demo environment – simulated funds/)).toBeTruthy()
+
+    const destinations = ['#/invest/plans', '#/trading/demo', '#/trading/live', '#/wallet/deposit', '#/membership']
+    for (const dest of destinations) {
+      await act(async () => {
+        window.location.hash = dest
+        await new Promise((r) => setTimeout(r, 100))
+      })
+      const text = container.textContent ?? ''
+      expect(text.length).toBeGreaterThan(500)
+      expect(text).toContain('Demo environment')
+    }
+    unmount()
+    window.location.hash = '#/'
+  }, 30000)
+
+  it('navigates via a real nav Link click without blanking', async () => {
+    window.location.hash = '#/'
+    const { container, unmount } = render(<App />)
+    const plansLink = screen.getAllByRole('link').find((l) => l.textContent === 'Plans')
+    expect(plansLink).toBeTruthy()
+    await act(async () => {
+      fireEvent.click(plansLink!)
+      await new Promise((r) => setTimeout(r, 100))
+    })
+    const text = container.textContent ?? ''
+    expect(text.length).toBeGreaterThan(500)
+    expect(text).toContain('Demo environment')
+    unmount()
+    window.location.hash = '#/'
+  }, 30000)
+})

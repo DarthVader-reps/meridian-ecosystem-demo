@@ -36,6 +36,12 @@ const ROUTES = [
   '/account/security',
   '/account/notifications',
   '/account/support',
+  '/dashboard',
+  '/login',
+  '/signup',
+  '/forgot-password',
+  '/reset-password',
+  '/admin/login',
   '/nope-not-a-route',
 ]
 

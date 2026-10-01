@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { Page } from '../../components/layout'
+import AuthLabel from '../../components/AuthLabel'
 import { Button, Card, Input } from '../../components/ui'
 import { useAuth } from '../../store/auth'
 
@@ -68,10 +69,15 @@ export default function Login() {
             </Button>
           </form>
           <p className="mt-4 text-center text-sm text-muted">
+            <Link to="/forgot-password" className="font-medium text-[var(--color-accent)] hover:underline">
+              Forgot password?
+            </Link>
+          </p>
+          <p className="mt-2 text-center text-sm text-muted">
             New to Meridian? <Link to="/signup" className="font-medium text-[var(--color-accent)] hover:underline">Create an account</Link>
           </p>
         </Card>
-        <p className="mt-4 text-center text-xs text-muted">Demo auth — accounts live in this browser only.</p>
+        <AuthLabel />
       </div>
     </Page>
   )

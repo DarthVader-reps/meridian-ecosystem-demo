@@ -58,6 +58,7 @@ interface AuthState {
   signUp: (name: string, email: string, password: string) => Promise<string | null>
   signIn: (email: string, password: string) => Promise<string | null>
   signOut: () => Promise<void>
+  resetPassword: (email: string) => Promise<string | null>
 }
 
 export const useAuth = create<AuthState>()((set, get) => ({
@@ -107,5 +108,15 @@ export const useAuth = create<AuthState>()((set, get) => ({
     await getAuthAdapter().signOut()
     resetToSeed()
     set({ user: null })
+  },
+
+  resetPassword: async (email: string) => {
+    set({ busy: true })
+    try {
+      const { error } = await getAuthAdapter().resetPassword(email)
+      return error
+    } finally {
+      set({ busy: false })
+    }
   },
 }))
