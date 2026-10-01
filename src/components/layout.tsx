@@ -2,17 +2,28 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import { BRAND, DEMO_DISCLAIMER } from '../config/brand'
 import { useUI } from '../store/ui'
+import { useAdmin } from '../store/admin'
 import { cn } from '../lib/cn'
 
 /* ---------- Persistent demo bar ---------- */
 
 export function DemoBar() {
+  const { settings } = useAdmin()
   return (
-    <div className="z-[70] bg-ink text-paper dark:bg-[#2a2a2d]" role="note" aria-label="Demo environment notice">
-      <p className="mx-auto max-w-7xl px-4 py-1.5 text-center text-xs font-medium tracking-wide">
-        Demo environment – simulated funds. Nothing here is real money.
-      </p>
-    </div>
+    <>
+      <div className="z-[70] bg-ink text-paper dark:bg-[#2a2a2d]" role="note" aria-label="Demo environment notice">
+        <p className="mx-auto max-w-7xl px-4 py-1.5 text-center text-xs font-medium tracking-wide">
+          Demo environment – simulated funds. Nothing here is real money.
+        </p>
+      </div>
+      {settings.maintenanceMode && (
+        <div className="z-[70] bg-amber-500 text-white" role="alert" aria-label="Maintenance mode notice">
+          <p className="mx-auto max-w-7xl px-4 py-1.5 text-center text-xs font-semibold tracking-wide">
+            Maintenance mode is on — demo actions are temporarily paused.
+          </p>
+        </div>
+      )}
+    </>
   )
 }
 
