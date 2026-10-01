@@ -166,13 +166,27 @@ export function Tabs<T extends string>({ tabs, value, onChange }: { tabs: { id: 
 
 export function Modal({ open, onClose, title, children }: { open: boolean; onClose: () => void; title: string; children: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null)
+  const onCloseRef = useRef(onClose)
+  onCloseRef.current = onClose
+  // Escape-to-close. The listener is registered once per open so typing
+  // (which re-renders the parent and recreates onClose) doesn't churn it.
   useEffect(() => {
     if (!open) return
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onCloseRef.current()
     document.addEventListener('keydown', onKey)
-    ref.current?.querySelector<HTMLElement>('button, input, select')?.focus()
     return () => document.removeEventListener('keydown', onKey)
-  }, [open, onClose])
+  }, [open])
+  // Initial focus: only on the open transition, never on re-renders.
+  // Focusing on every render stole focus mid-typing — typing "50" into an
+  // amount field ended as "5" because the second keystroke landed on the
+  // focused ✕ button instead of the input.
+  const wasOpen = useRef(false)
+  useEffect(() => {
+    if (open && !wasOpen.current) {
+      ref.current?.querySelector<HTMLElement>('input, select, textarea')?.focus()
+    }
+    wasOpen.current = open
+  }, [open])
   if (!open) return null
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label={title}>

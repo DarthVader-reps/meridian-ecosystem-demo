@@ -1,11 +1,13 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { useState } from 'react'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
-import { Tabs } from './components/ui'
+import { Modal, Tabs } from './components/ui'
 import { useRequireLogin } from './components/useRequireLogin'
 import { useTrading } from './store/trading'
 import { useAuth } from './store/auth'
 import DemoTrading from './pages/trading/DemoTrading'
+import PlansPage from './pages/invest/Plans'
 import App from './App'
 
 beforeEach(() => {
@@ -112,5 +114,126 @@ describe('useRequireLogin', () => {
     })
     expect(guardResult()).toBe(true)
     expect(screen.queryByText('LOGIN PAGE')).toBeNull()
+  })
+})
+
+describe('modal focus retention (issue: typing "50" into plan amount ended as "5")', () => {
+  // Mimics PlansPage: the parent recreates `close` on every render, so the
+  // Modal receives a fresh onClose identity after each keystroke.
+  function Harness() {
+    const [amount, setAmount] = useState('')
+    const close = () => {}
+    return (
+      <Modal open onClose={close} title="Test dialog">
+        <input aria-label="amount" value={amount} onChange={(e) => setAmount(e.target.value)} />
+      </Modal>
+    )
+  }
+
+  it('focuses the input (not the close button) when the dialog opens', () => {
+    render(<Harness />)
+    expect(document.activeElement).toBe(screen.getByLabelText('amount'))
+  })
+
+  it('keeps focus in the input across keystrokes so "50" stays "50"', () => {
+    render(<Harness />)
+    const input = screen.getByLabelText('amount') as HTMLInputElement
+    input.focus()
+    fireEvent.change(input, { target: { value: '5' } })
+    expect(document.activeElement).toBe(input)
+    expect(input.value).toBe('5')
+    fireEvent.change(input, { target: { value: '50' } })
+    expect(document.activeElement).toBe(input)
+    expect(input.value).toBe('50')
+  })
+
+  it('Escape still closes the dialog', () => {
+    let closed = 0
+    render(
+      <Modal open onClose={() => { closed += 1 }} title="Test dialog">
+        <input aria-label="amount" />
+      </Modal>,
+    )
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(closed).toBe(1)
+  })
+})
+
+describe('plan amount typing end-to-end (issue: "50" became "5")', () => {
+  it('typing 50 char-by-char into the Start-plan amount keeps the full value', async () => {
+    useAuth.setState({ user: { id: 'u1', email: 't@e.com', name: 'T' }, initialized: true } as never)
+    render(
+      <MemoryRouter>
+        <PlansPage />
+      </MemoryRouter>,
+    )
+    const startButtons = await screen.findAllByText('Start plan')
+    await act(async () => {
+      fireEvent.click(startButtons[0])
+    })
+    const amountInput = screen.getByLabelText('Amount (USD)') as HTMLInputElement
+    await act(async () => {
+      fireEvent.change(amountInput, { target: { value: '5' } })
+    })
+    await act(async () => {
+      fireEvent.change(amountInput, { target: { value: '50' } })
+    })
+    expect(amountInput.value).toBe('50')
+    expect(document.activeElement).toBe(amountInput)
+  })
+})
+
+describe('limit price display (issue: float dust like 184.22000122070312)', () => {
+  it('initializes the limit price input with a clean rounded value', () => {
+    render(
+      <MemoryRouter>
+        <DemoTrading />
+      </MemoryRouter>,
+    )
+    expect((screen.getByLabelText('Limit price') as HTMLInputElement).value).toBe('184.22')
+  })
+
+  it('switching assets keeps the limit price clean', () => {
+    render(
+      <MemoryRouter>
+        <DemoTrading />
+      </MemoryRouter>,
+    )
+    fireEvent.change(screen.getByLabelText('Asset'), { target: { value: 'BTC' } })
+    expect((screen.getByLabelText('Limit price') as HTMLInputElement).value).toBe('97412')
+  })
+})
+
+describe('admin settings float artifacts (issue: trading fee showed 0.10000000149011612)', () => {
+  it('updateSettings normalizes money fields to 2 decimals', async () => {
+    const { useAdmin } = await import('./store/admin')
+    useAdmin.getState().updateSettings({ tradingFeePct: 0.10000000149011612 })
+    expect(useAdmin.getState().settings.tradingFeePct).toBe(0.1)
+  })
+
+  it('persist rehydration cleans legacy float artifacts from storage', async () => {
+    // Simulate a real browser profile whose localStorage still holds a
+    // pre-fix artifact, then load the store module fresh so zustand's
+    // persist merge runs exactly as it does on page load.
+    vi.resetModules()
+    localStorage.setItem(
+      'meridian-admin',
+      JSON.stringify({
+        state: {
+          settings: {
+            platformName: 'Meridian',
+            maintenanceMode: false,
+            demoBalance: 100000,
+            tradingFeePct: 0.10000000149011612,
+            withdrawalFeeUSD: 5,
+            minDepositUSD: 10,
+            allowSignups: true,
+          },
+        },
+        version: 0,
+      }),
+    )
+    const { useAdmin } = await import('./store/admin')
+    expect(useAdmin.getState().settings.tradingFeePct).toBe(0.1)
   })
 })

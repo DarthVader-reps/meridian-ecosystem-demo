@@ -8,6 +8,17 @@ import seedGiveaways from '../mock/giveaways.json'
 
 export const ADMIN_PIN = '1234'
 
+// Money fields are normalized to 2 decimals everywhere settings are written
+// or rehydrated: guards against float artifacts (e.g. 0.10000000149011612)
+// that can linger in persisted storage from older builds.
+const round2 = (n: number) => Math.round(n * 100) / 100
+const cleanSettings = (s: PlatformSettings): PlatformSettings => ({
+  ...s,
+  tradingFeePct: round2(s.tradingFeePct),
+  withdrawalFeeUSD: round2(s.withdrawalFeeUSD),
+  minDepositUSD: round2(s.minDepositUSD),
+})
+
 export interface AdminUser {
   id: string
   name: string
@@ -252,7 +263,7 @@ export const useAdmin = create<AdminState>()(
       },
       updateSettings: (patch) =>
         set((s) => ({
-          settings: { ...s.settings, ...patch },
+          settings: cleanSettings({ ...s.settings, ...patch }),
           activity: [toActivity('Settings updated', Object.keys(patch).join(', ')), ...s.activity].slice(0, 200),
         })),
 
@@ -282,6 +293,14 @@ export const useAdmin = create<AdminState>()(
         settings: s.settings,
         activity: s.activity,
       }) as AdminState,
+      // Clean legacy float artifacts on rehydrate so a polluted persisted
+      // value (e.g. tradingFeePct 0.10000000149011612) can never resurface.
+      merge: (persisted, current) => {
+        const p = (persisted ?? {}) as Partial<AdminState>
+        const merged = { ...current, ...p }
+        if (p.settings) merged.settings = cleanSettings({ ...current.settings, ...p.settings })
+        return merged
+      },
     },
   ),
 )

@@ -17,6 +17,7 @@ interface Asset {
 
 const assets = assetsData as Asset[]
 const assetMap = new Map(assets.map((a) => [a.symbol, a]))
+const round8 = (n: number) => Math.round(n * 1e8) / 1e8
 
 function ChangePct({ value }: { value: number }) {
   return (
@@ -33,7 +34,7 @@ export default function DemoTrading() {
   const [symbol, setSymbol] = useState(assets[0].symbol)
   const [side, setSide] = useState<'buy' | 'sell'>('buy')
   const [qty, setQty] = useState('1')
-  const [price, setPrice] = useState(String(assets[0].price))
+  const [price, setPrice] = useState(String(round8(assets[0].price)))
   const [qtyError, setQtyError] = useState('')
   const [priceError, setPriceError] = useState('')
 
@@ -45,7 +46,7 @@ export default function DemoTrading() {
   function handleSymbolChange(v: string) {
     setSymbol(v)
     const a = assetMap.get(v)
-    if (a) setPrice(String(a.price))
+    if (a) setPrice(String(round8(a.price)))
   }
 
   function handleSubmit(e: React.FormEvent) {
