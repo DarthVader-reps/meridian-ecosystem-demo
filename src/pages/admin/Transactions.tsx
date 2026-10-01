@@ -18,15 +18,16 @@ interface PlatformTx {
   asset: string
   amount: number
   date: string
+  detail: string | null
 }
 
 const SEED_PLATFORM_TXS: PlatformTx[] = [
-  { id: 'ptx-1', user: 'Ava Chen', type: 'deposit', asset: 'USD', amount: 15000, date: new Date(Date.now() - 3600000 * 2).toISOString() },
-  { id: 'ptx-2', user: 'Liam Ortiz', type: 'trade', asset: 'BTC', amount: 0.12, date: new Date(Date.now() - 3600000 * 5).toISOString() },
-  { id: 'ptx-3', user: 'James Park', type: 'withdraw', asset: 'USD', amount: 4200, date: new Date(Date.now() - 3600000 * 9).toISOString() },
-  { id: 'ptx-4', user: 'Emma Wilson', type: 'swap', asset: 'ETH', amount: 1.5, date: new Date(Date.now() - 3600000 * 14).toISOString() },
-  { id: 'ptx-5', user: 'Sofia Marino', type: 'deposit', asset: 'USD', amount: 2500, date: new Date(Date.now() - 3600000 * 22).toISOString() },
-  { id: 'ptx-6', user: 'Ethan Brown', type: 'trade', asset: 'MRDN', amount: 50, date: new Date(Date.now() - 3600000 * 30).toISOString() },
+  { id: 'ptx-1', user: 'Ava Chen', type: 'deposit', asset: 'USD', amount: 15000, date: new Date(Date.now() - 3600000 * 2).toISOString(), detail: null },
+  { id: 'ptx-2', user: 'Liam Ortiz', type: 'trade', asset: 'BTC', amount: 0.12, date: new Date(Date.now() - 3600000 * 5).toISOString(), detail: null },
+  { id: 'ptx-3', user: 'James Park', type: 'withdraw', asset: 'USD', amount: 4200, date: new Date(Date.now() - 3600000 * 9).toISOString(), detail: null },
+  { id: 'ptx-4', user: 'Emma Wilson', type: 'swap', asset: 'ETH', amount: 1.5, date: new Date(Date.now() - 3600000 * 14).toISOString(), detail: null },
+  { id: 'ptx-5', user: 'Sofia Marino', type: 'deposit', asset: 'USD', amount: 2500, date: new Date(Date.now() - 3600000 * 22).toISOString(), detail: null },
+  { id: 'ptx-6', user: 'Ethan Brown', type: 'trade', asset: 'MRDN', amount: 50, date: new Date(Date.now() - 3600000 * 30).toISOString(), detail: null },
 ]
 
 function fmtDate(iso: string) {
@@ -55,6 +56,7 @@ function TxTable({ rows }: { rows: PlatformTx[] }) {
             <th className="px-4 py-3 font-medium">Type</th>
             <th className="px-4 py-3 font-medium">Asset</th>
             <th className="px-4 py-3 font-medium">Amount</th>
+            <th className="px-4 py-3 font-medium">Detail</th>
             <th className="px-4 py-3 font-medium">Date</th>
           </tr>
         </thead>
@@ -66,6 +68,9 @@ function TxTable({ rows }: { rows: PlatformTx[] }) {
               <td className="px-4 py-3 font-mono">{t.asset}</td>
               <td className={`px-4 py-3 font-mono ${t.amount < 0 ? 'text-red-600' : 'text-ink dark:text-paper'}`}>
                 {t.amount < 0 ? '' : '+'}{t.amount.toLocaleString()}
+              </td>
+              <td className="max-w-64 px-4 py-3 text-muted" title={t.detail ?? undefined}>
+                {t.detail ? <span className="line-clamp-2">{t.detail}</span> : <span className="text-muted/60">—</span>}
               </td>
               <td className="px-4 py-3 text-muted">{fmtDate(t.date)}</td>
             </tr>
@@ -114,6 +119,7 @@ export default function Transactions() {
       asset: t.asset,
       amount: t.amount,
       date: t.date,
+      detail: t.detail ?? null,
     }))
     return [...mine, ...SEED_PLATFORM_TXS].sort((a, b) => b.date.localeCompare(a.date))
   }, [ownTx])
@@ -127,6 +133,7 @@ export default function Transactions() {
         asset: t.asset,
         amount: t.amount,
         date: t.created_at,
+        detail: t.detail,
       })),
     [liveTxs],
   )
@@ -135,14 +142,18 @@ export default function Transactions() {
   const rows = (isLive ? liveRows : demoRows).filter((t) => {
     const matchesType = typeFilter === 'all' || t.type === typeFilter
     const q = query.toLowerCase()
-    const matchesQ = !q || t.user.toLowerCase().includes(q) || t.asset.toLowerCase().includes(q)
+    const matchesQ =
+      !q ||
+      t.user.toLowerCase().includes(q) ||
+      t.asset.toLowerCase().includes(q) ||
+      (t.detail ?? '').toLowerCase().includes(q)
     return matchesType && matchesQ
   })
 
   const filters = (
     <div className="flex flex-wrap gap-3">
       <Input
-        placeholder="Search user or asset…"
+        placeholder="Search user, asset, or detail…"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         className="max-w-xs"

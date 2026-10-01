@@ -6,8 +6,10 @@ import { Modal, Tabs } from './components/ui'
 import { useRequireLogin } from './components/useRequireLogin'
 import { useTrading } from './store/trading'
 import { useAuth } from './store/auth'
+import { useWallet } from './store/wallet'
 import DemoTrading from './pages/trading/DemoTrading'
 import PlansPage from './pages/invest/Plans'
+import AdminTransactions from './pages/admin/Transactions'
 import App from './App'
 
 // Live price polling would hit real exchange APIs from the test runner —
@@ -253,5 +255,28 @@ describe('admin settings float artifacts (issue: trading fee showed 0.1000000014
     )
     const { useAdmin } = await import('./store/admin')
     expect(useAdmin.getState().settings.tradingFeePct).toBe(0.1)
+  })
+})
+
+describe('admin transactions ledger (issue: admin credit/debit reasons were invisible)', () => {
+  it('renders the detail column and makes it searchable', () => {
+    const w = useWallet.getState()
+    w.reset()
+    w.deposit('USD', 10, 'Admin credit: QA verification credit')
+    render(
+      <MemoryRouter>
+        <AdminTransactions />
+      </MemoryRouter>,
+    )
+    // The Detail column header and the reason text are visible.
+    expect(screen.getByText('Detail')).toBeTruthy()
+    expect(screen.getByText('Admin credit: QA verification credit')).toBeTruthy()
+    // Searching the reason narrows to the matching row…
+    fireEvent.change(screen.getByLabelText('Search transactions'), { target: { value: 'QA verification' } })
+    expect(screen.getByText('Admin credit: QA verification credit')).toBeTruthy()
+    // …and a non-matching query hides it.
+    fireEvent.change(screen.getByLabelText('Search transactions'), { target: { value: 'no-such-detail-xyz' } })
+    expect(screen.queryByText('Admin credit: QA verification credit')).toBeNull()
+    w.reset()
   })
 })
