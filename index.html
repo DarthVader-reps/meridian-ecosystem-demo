@@ -4,6 +4,13 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- GitHub Pages cannot send custom security headers, so the policy ships as a meta tag.
+         Tightest policy the app supports: all assets are local, only Supabase is remote.
+         style-src keeps 'unsafe-inline' because React sets inline styles at runtime. -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob: data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co; font-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"
+    />
     <meta name="description" content="Meridian — a simulated investment and trading ecosystem demo. All funds are mock data; nothing here is real money." />
     <title>Meridian — Invest, trade, manage (demo)</title>
   </head>
