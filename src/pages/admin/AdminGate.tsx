@@ -12,6 +12,11 @@ export default function AdminGate() {
   const [error, setError] = useState('')
   const [checking, setChecking] = useState(isSupabaseConfigured && !isAdmin)
 
+  // Console already unlocked (PIN or a previous auto-grant) → go straight in.
+  useEffect(() => {
+    if (isAdmin) navigate('/admin', { replace: true })
+  }, [isAdmin, navigate])
+
   // If the operator is already logged in as an admin-role user, skip the PIN.
   useEffect(() => {
     if (!isSupabaseConfigured || isAdmin) return
@@ -28,6 +33,9 @@ export default function AdminGate() {
       cancelled = true
     }
   }, [isAdmin, grant, navigate])
+
+  // Redirecting to the console — render nothing meanwhile.
+  if (isAdmin) return null
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault()
