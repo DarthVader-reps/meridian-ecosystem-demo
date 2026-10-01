@@ -25,7 +25,7 @@ export interface AuthAdapter {
   signUp(name: string, email: string, password: string): Promise<AuthResult>
   signIn(email: string, password: string): Promise<AuthResult>
   signOut(): Promise<void>
-  getSession(): AuthUser | null
+  getSession(): Promise<AuthUser | null>
 }
 
 interface StoredUser extends AuthUser {
@@ -109,7 +109,7 @@ export const demoAdapter: AuthAdapter = {
     localStorage.removeItem(SESSION_KEY)
   },
 
-  getSession() {
+  async getSession() {
     const id = localStorage.getItem(SESSION_KEY)
     if (!id) return null
     const found = readUsers().find((u) => u.id === id)

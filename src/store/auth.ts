@@ -67,7 +67,12 @@ export const useAuth = create<AuthState>()((set, get) => ({
 
   init: () => {
     if (get().initialized) return
-    set({ user: getAuthAdapter().getSession(), initialized: true })
+    // Mark initialized immediately so the UI doesn't hang; fill in user async.
+    set({ initialized: true })
+    void getAuthAdapter()
+      .getSession()
+      .then((user) => set({ user }))
+      .catch(() => set({ user: null }))
   },
 
   signUp: async (name, email, password) => {
