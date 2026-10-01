@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { getAuthAdapter, type AuthUser } from '../lib/auth'
+import { serverWalletUser, setServerWalletUser } from '../lib/walletServer'
 import { useWallet } from './wallet'
 import { usePortfolio } from './portfolio'
 import { useMembership } from './membership'
@@ -72,7 +73,17 @@ export const useAuth = create<AuthState>()((set, get) => ({
     set({ initialized: true })
     void getAuthAdapter()
       .getSession()
-      .then((user) => set({ user }))
+      .then(async (user) => {
+        if (user) {
+          setServerWalletUser(user.id)
+          try {
+            await useWallet.getState().syncFromServer()
+          } catch {
+            /* keep local wallet */
+          }
+        }
+        set({ user })
+      })
       .catch(() => set({ user: null }))
   },
 
@@ -81,7 +92,9 @@ export const useAuth = create<AuthState>()((set, get) => ({
     try {
       const { user, error } = await getAuthAdapter().signUp(name, email, password)
       if (error || !user) return error ?? 'Sign up failed.'
-      resetToSeed()
+      setServerWalletUser(user.id)
+      // Server-backed wallet seeds the opening balances; fall back to local seed.
+      if (!(await useWallet.getState().syncFromServer().catch(() => false))) resetToSeed()
       set({ user })
       return null
     } finally {
@@ -94,7 +107,14 @@ export const useAuth = create<AuthState>()((set, get) => ({
     try {
       const { user, error } = await getAuthAdapter().signIn(email, password)
       if (error || !user) return error ?? 'Sign in failed.'
-      if (!restoreSnapshot(user.id)) resetToSeed()
+      setServerWalletUser(user.id)
+      let synced = false
+      try {
+        synced = await useWallet.getState().syncFromServer()
+      } catch {
+        synced = false
+      }
+      if (!synced && !restoreSnapshot(user.id)) resetToSeed()
       set({ user })
       return null
     } finally {
@@ -104,7 +124,9 @@ export const useAuth = create<AuthState>()((set, get) => ({
 
   signOut: async () => {
     const { user } = get()
-    if (user) takeSnapshot(user.id)
+    // Server-backed wallets are already persisted; only snapshot local wallets.
+    if (user && !serverWalletUser()) takeSnapshot(user.id)
+    setServerWalletUser(null)
     await getAuthAdapter().signOut()
     resetToSeed()
     set({ user: null })

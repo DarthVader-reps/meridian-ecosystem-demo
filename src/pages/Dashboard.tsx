@@ -7,12 +7,7 @@ import { useWallet } from '../store/wallet'
 import { usePortfolio } from '../store/portfolio'
 import { useMembership } from '../store/membership'
 import { formatMoney, formatPct } from '../lib/market'
-import assetsJson from '../mock/assets.json'
-
-const priceMap: Record<string, number> = {}
-for (const a of assetsJson as Array<{ symbol: string; price: number }>) {
-  priceMap[a.symbol] = a.price
-}
+import { useAssets } from '../lib/assetPrices'
 
 // Simulated 30-day net-worth history for the chart
 function netWorthHistory(current: number) {
@@ -35,8 +30,11 @@ export default function Dashboard() {
   const { balances, transactions } = useWallet()
   const { holdings, plans } = usePortfolio()
   const { tier, vip, giveawayEntries } = useMembership()
+  const assets = useAssets()
 
   const { netWorth, holdingsValue, walletValue, plansValue, holdingsRows } = useMemo(() => {
+    const priceMap: Record<string, number> = {}
+    for (const a of assets) priceMap[a.symbol] = a.price
     const walletValue = Object.entries(balances).reduce((s, [asset, qty]) => {
       const price = asset === 'USD' ? 1 : (priceMap[asset] ?? 0)
       return s + qty * price
@@ -50,7 +48,7 @@ export default function Dashboard() {
     const holdingsValue = rows.reduce((s, r) => s + r.value, 0)
     const plansValue = plans.reduce((s, p) => s + p.amount, 0)
     return { netWorth: walletValue + holdingsValue + plansValue, holdingsValue, walletValue, plansValue, holdingsRows: rows }
-  }, [balances, holdings, plans])
+  }, [assets, balances, holdings, plans])
 
   const history = useMemo(() => netWorthHistory(netWorth), [netWorth])
   const change30d = history.length > 1 && history[0].value > 0

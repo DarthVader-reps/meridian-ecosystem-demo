@@ -6,8 +6,10 @@ import { Card, SectionHeader, Badge, Input, Select, Button, EmptyState, Modal } 
 import DataSourceBadge from '../../components/DataSourceBadge'
 import { isSupabaseConfigured } from '../../config/supabase'
 import {
+  adjustUserBalance,
   fetchProfiles,
   getAdminAccess,
+  setUserTxFrozen,
   updateProfileRole,
   updateProfileStatus,
   type AdminAccess,
@@ -35,6 +37,12 @@ function SupabaseUsers() {
   const [busyId, setBusyId] = useState<string | null>(null)
   const [pendingStatus, setPendingStatus] = useState<SupabaseProfile | null>(null)
   const [pendingRole, setPendingRole] = useState<{ p: SupabaseProfile; role: 'user' | 'admin' } | null>(null)
+  const [pendingAdjust, setPendingAdjust] = useState<SupabaseProfile | null>(null)
+  const [pendingFreeze, setPendingFreeze] = useState<SupabaseProfile | null>(null)
+  const [adjAsset, setAdjAsset] = useState('USD')
+  const [adjAmount, setAdjAmount] = useState('')
+  const [adjReason, setAdjReason] = useState('')
+  const [adjError, setAdjError] = useState('')
 
   useEffect(() => {
     let cancelled = false
@@ -96,6 +104,55 @@ function SupabaseUsers() {
       'Role updated',
       `${pr.p.name || pr.p.email || ''} → ${pr.role}`,
     )
+  }
+
+  async function confirmPendingFreeze() {
+    const p = pendingFreeze
+    if (!p) return
+    const next = !p.tx_frozen
+    setPendingFreeze(null)
+    await runUpdate(
+      p.id,
+      () => setUserTxFrozen(p.id, next),
+      next ? 'Transactions frozen' : 'Transactions unfrozen',
+      p.name || p.email || '',
+    )
+  }
+
+  function openAdjust(p: SupabaseProfile) {
+    setAdjAsset('USD')
+    setAdjAmount('')
+    setAdjReason('')
+    setAdjError('')
+    setPendingAdjust(p)
+  }
+
+  async function confirmPendingAdjust() {
+    const p = pendingAdjust
+    if (!p) return
+    const amount = Number(adjAmount)
+    if (!Number.isFinite(amount) || amount === 0) {
+      setAdjError('Enter a non-zero amount. Positive credits, negative debits.')
+      return
+    }
+    if (adjReason.trim().length < 3) {
+      setAdjError('A reason is required for the audit trail.')
+      return
+    }
+    setBusyId(p.id)
+    const err = await adjustUserBalance({ userId: p.id, asset: adjAsset, amount, reason: adjReason })
+    setBusyId(null)
+    if (err) {
+      setAdjError(err)
+      return
+    }
+    setPendingAdjust(null)
+    pushToast(
+      amount > 0 ? 'Balance credited' : 'Balance debited',
+      `${p.name || p.email || ''}: ${amount > 0 ? '+' : ''}${amount} ${adjAsset}`,
+    )
+    const r = await fetchProfiles()
+    if (!r.error) setProfiles(r.profiles)
   }
 
   const filtered = profiles.filter((p) => {
@@ -169,7 +226,7 @@ function SupabaseUsers() {
     <div className="space-y-6">
       <SectionHeader
         title="Users"
-        body={`${profiles.length} real accounts from Supabase. Suspension is enforced at login.`}
+        body={`${profiles.length} real accounts from Supabase. Suspension is enforced at login; freeze blocks money movement without locking the account.`}
       />
 
       <div className="flex flex-wrap items-center gap-3">
@@ -223,7 +280,10 @@ function SupabaseUsers() {
                       </Select>
                     </td>
                     <td className="px-4 py-3">
-                      <Badge tone={p.status === 'active' ? 'green' : 'red'}>{p.status}</Badge>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <Badge tone={p.status === 'active' ? 'green' : 'red'}>{p.status}</Badge>
+                        {p.tx_frozen && <Badge tone="amber">frozen</Badge>}
+                      </div>
                     </td>
                     <td className="px-4 py-3 text-muted">
                       {new Date(p.created_at).toLocaleDateString(undefined, {
@@ -233,14 +293,32 @@ function SupabaseUsers() {
                       })}
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <Button
-                        size="sm"
-                        variant={p.status === 'active' ? 'secondary' : 'primary'}
-                        disabled={busyId === p.id}
-                        onClick={() => setPendingStatus(p)}
-                      >
-                        {p.status === 'active' ? 'Suspend' : 'Reactivate'}
-                      </Button>
+                      <div className="flex flex-wrap justify-end gap-2">
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          disabled={busyId === p.id}
+                          onClick={() => openAdjust(p)}
+                        >
+                          Adjust
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          disabled={busyId === p.id}
+                          onClick={() => setPendingFreeze(p)}
+                        >
+                          {p.tx_frozen ? 'Unfreeze' : 'Freeze'}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant={p.status === 'active' ? 'secondary' : 'primary'}
+                          disabled={busyId === p.id}
+                          onClick={() => setPendingStatus(p)}
+                        >
+                          {p.status === 'active' ? 'Suspend' : 'Reactivate'}
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -301,6 +379,101 @@ function SupabaseUsers() {
               </Button>
               <Button onClick={() => void confirmPendingRole()} className="flex-1">
                 Change role
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      <Modal
+        open={pendingFreeze !== null}
+        onClose={() => setPendingFreeze(null)}
+        title={pendingFreeze?.tx_frozen ? 'Unfreeze transactions?' : 'Freeze transactions?'}
+      >
+        {pendingFreeze && (
+          <div className="space-y-4">
+            <p className="text-sm text-muted">
+              {pendingFreeze.tx_frozen ? (
+                <>
+                  <span className="font-semibold text-ink dark:text-paper">{pendingFreeze.name || pendingFreeze.email}</span>{' '}
+                  will be able to deposit, withdraw, transfer and swap again.
+                </>
+              ) : (
+                <>
+                  <span className="font-semibold text-ink dark:text-paper">{pendingFreeze.name || pendingFreeze.email}</span>{' '}
+                  will be blocked from deposits, withdrawals, transfers and swaps until unfrozen. They can still
+                  log in and view their balances. Unlike suspension, this does not lock them out.
+                </>
+              )}
+            </p>
+            <div className="flex gap-3">
+              <Button variant="secondary" onClick={() => setPendingFreeze(null)} className="flex-1">
+                Cancel
+              </Button>
+              <Button onClick={() => void confirmPendingFreeze()} className="flex-1">
+                {pendingFreeze.tx_frozen ? 'Unfreeze' : 'Freeze transactions'}
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      <Modal
+        open={pendingAdjust !== null}
+        onClose={() => setPendingAdjust(null)}
+        title="Adjust balance"
+      >
+        {pendingAdjust && (
+          <div className="space-y-4">
+            <p className="text-sm text-muted">
+              Credit or debit{' '}
+              <span className="font-semibold text-ink dark:text-paper">{pendingAdjust.name || pendingAdjust.email}</span>
+              's wallet. The reason is written to the ledger as the audit trail. Positive amounts credit,
+              negative amounts debit.
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              <label className="block text-sm">
+                <span className="mb-1 block font-medium text-ink dark:text-paper">Asset</span>
+                <Select value={adjAsset} onChange={(e) => setAdjAsset(e.target.value)} aria-label="Asset">
+                  <option value="USD">USD</option>
+                  <option value="BTC">BTC</option>
+                  <option value="ETH">ETH</option>
+                  <option value="SOL">SOL</option>
+                </Select>
+              </label>
+              <label className="block text-sm">
+                <span className="mb-1 block font-medium text-ink dark:text-paper">Amount</span>
+                <Input
+                  id="adj-amount"
+                  type="number"
+                  step="any"
+                  placeholder="+100 or -50"
+                  value={adjAmount}
+                  onChange={(e) => setAdjAmount(e.target.value)}
+                  aria-label="Amount (positive credits, negative debits)"
+                />
+              </label>
+            </div>
+            <label className="block text-sm">
+              <span className="mb-1 block font-medium text-ink dark:text-paper">Reason (audit trail)</span>
+              <Input
+                placeholder="e.g. Goodwill credit for outage on Oct 1"
+                value={adjReason}
+                onChange={(e) => setAdjReason(e.target.value)}
+                aria-label="Reason for adjustment"
+              />
+            </label>
+            {adjError && <p className="text-sm text-red-600 dark:text-red-400">{adjError}</p>}
+            <div className="flex gap-3">
+              <Button variant="secondary" onClick={() => setPendingAdjust(null)} className="flex-1">
+                Cancel
+              </Button>
+              <Button
+                onClick={() => void confirmPendingAdjust()}
+                disabled={busyId === pendingAdjust.id}
+                className="flex-1"
+              >
+                Apply adjustment
               </Button>
             </div>
           </div>

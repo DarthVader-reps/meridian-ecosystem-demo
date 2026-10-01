@@ -3,21 +3,10 @@ import { Link } from 'react-router-dom'
 import { Page } from '../../components/layout'
 import { Badge, Card, EmptyState, Input, LoadingState, Select } from '../../components/ui'
 import { formatMoney, formatPct } from '../../lib/market'
-import assetsJson from '../../mock/assets.json'
-
-interface Asset {
-  symbol: string
-  name: string
-  type: 'stock' | 'crypto'
-  price: number
-  changePct: number
-  currency: string
-  sector: string
-}
-
-const assets = assetsJson as unknown as Asset[]
+import { useAssets } from '../../lib/assetPrices'
 
 export default function StocksPage() {
+  const assets = useAssets()
   const [ready, setReady] = useState(false)
   const [query, setQuery] = useState('')
   const [sector, setSector] = useState('all')
@@ -27,7 +16,7 @@ export default function StocksPage() {
     return () => clearTimeout(t)
   }, [])
 
-  const stocks = useMemo(() => assets.filter((a) => a.type === 'stock'), [])
+  const stocks = useMemo(() => assets.filter((a) => a.type === 'stock'), [assets])
   const sectors = useMemo(() => Array.from(new Set(stocks.map((s) => s.sector))).sort(), [stocks])
 
   const results = useMemo(() => {

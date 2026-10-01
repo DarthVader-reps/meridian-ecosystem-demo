@@ -3,21 +3,10 @@ import { Link } from 'react-router-dom'
 import { Page } from '../../components/layout'
 import { Card, EmptyState, Input, LoadingState } from '../../components/ui'
 import { formatMoney, formatPct } from '../../lib/market'
-import assetsJson from '../../mock/assets.json'
-
-interface Asset {
-  symbol: string
-  name: string
-  type: 'stock' | 'crypto'
-  price: number
-  changePct: number
-  currency: string
-  sector: string
-}
-
-const assets = assetsJson as unknown as Asset[]
+import { useAssets } from '../../lib/assetPrices'
 
 export default function CryptoPage() {
+  const assets = useAssets()
   const [ready, setReady] = useState(false)
   const [query, setQuery] = useState('')
 
@@ -26,7 +15,7 @@ export default function CryptoPage() {
     return () => clearTimeout(t)
   }, [])
 
-  const coins = useMemo(() => assets.filter((a) => a.type === 'crypto'), [])
+  const coins = useMemo(() => assets.filter((a) => a.type === 'crypto'), [assets])
 
   const results = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -39,7 +28,7 @@ export default function CryptoPage() {
     pct >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
 
   return (
-    <Page title="Crypto" intro="Browse simulated crypto assets and open a detail view to trade." disclaimer>
+    <Page title="Crypto" intro="BTC, ETH and SOL stream live market prices. Other assets are simulated — open a detail view to trade." disclaimer>
       {!ready ? (
         <LoadingState label="Loading crypto" />
       ) : (

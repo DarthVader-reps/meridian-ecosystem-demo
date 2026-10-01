@@ -5,25 +5,14 @@ import { Button, Card, EmptyState, LoadingState, PriceChart, Stat, Tabs } from '
 import { usePortfolio } from '../../store/portfolio'
 import { formatMoney, formatPct, formatQty, priceHistory, rangeSlice, timeAgo } from '../../lib/market'
 import type { PricePoint } from '../../lib/market'
-import assetsJson from '../../mock/assets.json'
+import { useAssets } from '../../lib/assetPrices'
 import plansJson from '../../mock/plans.json'
-
-interface Asset {
-  symbol: string
-  name: string
-  type: 'stock' | 'crypto'
-  price: number
-  changePct: number
-  currency: string
-  sector: string
-}
 
 interface Plan {
   id: string
   name: string
 }
 
-const assets = assetsJson as unknown as Asset[]
 const plans = plansJson as unknown as Plan[]
 
 type RangeKey = '1D' | '1W' | '1M' | '1Y' | 'All'
@@ -39,6 +28,7 @@ const RANGES: { id: RangeKey; label: string }[] = [
 const POINTS = 150
 
 export default function PortfolioPage() {
+  const assets = useAssets()
   const [ready, setReady] = useState(false)
   const [range, setRange] = useState<RangeKey>('1M')
   const holdings = usePortfolio((s) => s.holdings)
@@ -53,7 +43,7 @@ export default function PortfolioPage() {
     const map: Record<string, number> = {}
     for (const a of assets) map[a.symbol] = a.price
     return map
-  }, [])
+  }, [assets])
 
   const rows = useMemo(
     () =>

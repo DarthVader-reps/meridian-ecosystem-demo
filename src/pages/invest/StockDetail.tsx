@@ -19,19 +19,7 @@ import { useWallet } from '../../store/wallet'
 import { useUI } from '../../store/ui'
 import { formatMoney, formatPct, formatQty, priceHistory, rangeSlice } from '../../lib/market'
 import type { PricePoint } from '../../lib/market'
-import assetsJson from '../../mock/assets.json'
-
-interface Asset {
-  symbol: string
-  name: string
-  type: 'stock' | 'crypto'
-  price: number
-  changePct: number
-  currency: string
-  sector: string
-}
-
-const assets = assetsJson as unknown as Asset[]
+import { useAssets } from '../../lib/assetPrices'
 
 type RangeKey = '1D' | '1W' | '1M' | '1Y' | 'All'
 type Side = 'buy' | 'sell'
@@ -48,10 +36,11 @@ export default function StockDetail() {
   const { symbol } = useParams<{ symbol: string }>()
   const navigate = useNavigate()
   const key = (symbol ?? '').toUpperCase()
+  const assets = useAssets()
 
   const asset = useMemo(
     () => assets.find((a) => a.type === 'stock' && a.symbol.toUpperCase() === key),
-    [key],
+    [assets, key],
   )
 
   const [ready, setReady] = useState(false)

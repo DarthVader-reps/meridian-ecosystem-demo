@@ -342,12 +342,15 @@ export function PriceChart({ data, height = 220, accent = BRAND.accentColor }: {
 
 /* ---------- Ticker ---------- */
 
-export function Ticker({ items }: { items: { symbol: string; price: number; changePct: number }[] }) {
+export function Ticker({ items }: { items: { symbol: string; price: number; changePct: number; live?: boolean }[] }) {
   return (
     <div className="overflow-x-auto thin-scroll border-y border-line dark:border-[#2a2a2d] bg-paper dark:bg-ink" aria-label="Market ticker">
       <div className="flex min-w-max items-center gap-8 px-6 py-2.5">
         {items.map((it) => (
           <span key={it.symbol} className="flex items-center gap-2 text-sm whitespace-nowrap">
+            {it.live && (
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-green-500" title="Live market price" aria-label="Live price" />
+            )}
             <span className="font-semibold text-ink dark:text-paper">{it.symbol}</span>
             <span className="text-muted">${it.price.toLocaleString()}</span>
             <span className={it.changePct >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}>

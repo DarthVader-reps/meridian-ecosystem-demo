@@ -10,6 +10,24 @@ import DemoTrading from './pages/trading/DemoTrading'
 import PlansPage from './pages/invest/Plans'
 import App from './App'
 
+// Live price polling would hit real exchange APIs from the test runner —
+// keep it a no-op here so tests stay hermetic and deterministic.
+vi.mock('./store/prices', () => {
+  const state = {
+    quotes: {},
+    live: false,
+    updatedAt: null,
+    refreshing: false,
+    refresh: async () => {},
+  }
+  const usePrices = (selector?: (s: typeof state) => unknown) =>
+    selector ? selector(state) : state
+  return {
+    usePrices,
+    startPricePolling: () => () => {},
+  }
+})
+
 beforeEach(() => {
   localStorage.clear()
   useTrading.getState().reset()

@@ -7,6 +7,8 @@ export interface SupabaseProfile {
   email: string | null
   role: 'user' | 'admin'
   status: 'active' | 'suspended'
+  /** True when an admin froze this account's transactions (migration-005). */
+  tx_frozen: boolean
   created_at: string
 }
 
@@ -48,10 +50,12 @@ export async function fetchProfiles(): Promise<{ profiles: SupabaseProfile[]; er
     const client = requireClient()
     const { data, error } = await client
       .from('profiles')
-      .select('id,name,email,role,status,created_at')
+      .select('id,name,email,role,status,tx_frozen,created_at')
       .order('created_at', { ascending: false })
     if (error) return { profiles: [], error: error.message }
-    return { profiles: (data ?? []) as SupabaseProfile[], error: null }
+    // Profiles created before migration-005 lack tx_frozen; default to false.
+    const profiles = ((data ?? []) as SupabaseProfile[]).map((p) => ({ ...p, tx_frozen: p.tx_frozen === true }))
+    return { profiles, error: null }
   } catch (e) {
     return { profiles: [], error: e instanceof Error ? e.message : 'Failed to load users.' }
   }
@@ -75,6 +79,76 @@ export async function updateProfileStatus(
     return error ? error.message : null
   } catch (e) {
     return e instanceof Error ? e.message : 'Failed to update status.'
+  }
+}
+
+/** Freezes / unfreezes a user's transactions (migration-005). */
+export async function setUserTxFrozen(id: string, frozen: boolean): Promise<string | null> {
+  try {
+    const { error } = await requireClient().from('profiles').update({ tx_frozen: frozen }).eq('id', id)
+    return error ? error.message : null
+  } catch (e) {
+    return e instanceof Error ? e.message : 'Failed to update freeze status.'
+  }
+}
+
+export interface BalanceAdjustment {
+  userId: string
+  asset: string
+  /** Positive = credit, negative = debit. */
+  amount: number
+  reason: string
+}
+
+/**
+ * Credits or debits a user's balance, with a mandatory reason that lands in
+ * the ledger as the audit trail. Requires migration-005 (admin policies).
+ * Returns an error string, or null on success.
+ */
+export async function adjustUserBalance({
+  userId,
+  asset,
+  amount,
+  reason,
+}: BalanceAdjustment): Promise<string | null> {
+  try {
+    const client = requireClient()
+    const cleanAsset = asset.trim().toUpperCase()
+    const cleanReason = reason.trim()
+    if (!cleanAsset) return 'Choose an asset.'
+    if (!Number.isFinite(amount) || amount === 0) return 'Enter a non-zero amount.'
+    if (cleanReason.length < 3) return 'A reason is required for the audit trail.'
+
+    const round8 = (n: number) => Math.round(n * 1e8) / 1e8
+    const delta = round8(amount)
+
+    const { data: row, error: readError } = await client
+      .from('wallet_balances')
+      .select('balance')
+      .eq('user_id', userId)
+      .eq('asset', cleanAsset)
+      .maybeSingle()
+    if (readError) return readError.message
+    const current = Number((row as { balance?: number } | null)?.balance ?? 0)
+    const next = round8(current + delta)
+    if (next < 0) return `Insufficient ${cleanAsset} balance for this debit (has ${current}).`
+
+    const { error: upsertError } = await client
+      .from('wallet_balances')
+      .upsert({ user_id: userId, asset: cleanAsset, balance: next }, { onConflict: 'user_id,asset' })
+    if (upsertError) return upsertError.message
+
+    const { error: txError } = await client.from('transactions').insert({
+      user_id: userId,
+      type: delta > 0 ? 'deposit' : 'withdraw',
+      asset: cleanAsset,
+      amount: delta,
+      detail: `Admin ${delta > 0 ? 'credit' : 'debit'}: ${cleanReason}`,
+    })
+    if (txError) return txError.message
+    return null
+  } catch (e) {
+    return e instanceof Error ? e.message : 'Balance adjustment failed.'
   }
 }
 

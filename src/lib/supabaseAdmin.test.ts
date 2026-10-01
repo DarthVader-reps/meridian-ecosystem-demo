@@ -16,6 +16,7 @@ function profile(over: Partial<SupabaseProfile> & { id: string }): SupabaseProfi
     email: 'test@example.com',
     role: 'user',
     status: 'active',
+    tx_frozen: false,
     created_at: '2026-09-20T10:00:00.000Z',
     ...over,
   }

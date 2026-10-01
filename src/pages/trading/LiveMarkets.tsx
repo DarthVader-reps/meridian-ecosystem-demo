@@ -3,18 +3,7 @@ import { Badge, Card, PriceChart, Stat, Tabs } from '../../components/ui'
 import { Page } from '../../components/layout'
 import { formatMoney, formatPct, priceHistory, rangeSlice } from '../../lib/market'
 import { cn } from '../../lib/cn'
-import assetsData from '../../mock/assets.json'
-
-interface Asset {
-  symbol: string
-  name: string
-  type: string
-  price: number
-  changePct: number
-  sector: string
-}
-
-const assets = assetsData as Asset[]
+import { LIVE_SYMBOLS, useAssets, usePricesLive } from '../../lib/assetPrices'
 
 type Range = '1D' | '1W' | '1M' | '1Y' | 'All'
 
@@ -48,6 +37,8 @@ function buildBook(symbol: string, price: number): { bids: BookLevel[]; asks: Bo
 }
 
 export default function LiveMarkets() {
+  const assets = useAssets()
+  const pricesLive = usePricesLive()
   const [selectedSymbol, setSelectedSymbol] = useState(assets[0].symbol)
   const [range, setRange] = useState<Range>('1W')
 
@@ -63,7 +54,7 @@ export default function LiveMarkets() {
   const dayLow = Math.min(...history.map((p) => p.price))
 
   return (
-    <Page title="Live markets" intro="Browse simulated prices and an illustrative order book. All data is generated for this demo." disclaimer>
+    <Page title="Live markets" intro="BTC, ETH and SOL stream live market prices; the order book and all other quotes are illustrative. Nothing here moves real money." disclaimer>
       <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
         <Card className="p-4 lg:p-4">
           <h2 className="px-2 pt-1 text-sm font-semibold uppercase tracking-wide text-muted">Watchlist</h2>
@@ -109,6 +100,7 @@ export default function LiveMarkets() {
                 <div className="flex items-center gap-2">
                   <h2 className="text-xl font-semibold text-ink dark:text-paper">{selected.name}</h2>
                   <Badge tone="neutral">{selected.type === 'crypto' ? 'Crypto' : 'Stock'}</Badge>
+                  {pricesLive && LIVE_SYMBOLS.has(selected.symbol) && <Badge tone="green">Live price</Badge>}
                 </div>
                 <p className="mt-1 text-sm text-muted">
                   {selected.symbol} · {selected.sector}
@@ -128,7 +120,11 @@ export default function LiveMarkets() {
               <Stat
                 label="Change"
                 value={formatPct(selected.changePct)}
-                sub={<span className={up ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}>Simulated 24h move</span>}
+                sub={
+                  <span className={up ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}>
+                    {pricesLive && LIVE_SYMBOLS.has(selected.symbol) ? 'Live 24h move' : 'Simulated 24h move'}
+                  </span>
+                }
               />
               <Stat label="Simulated day high" value={formatMoney(dayHigh)} />
               <Stat label="Simulated day low" value={formatMoney(dayLow)} />

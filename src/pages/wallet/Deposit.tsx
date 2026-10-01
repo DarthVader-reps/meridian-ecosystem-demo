@@ -10,7 +10,7 @@ const METHODS = ['Bank transfer (simulated)', 'Card (simulated)', 'Crypto transf
 const STEPS = ['Amount', 'Method', 'Review']
 
 export default function Deposit() {
-  const { balances, deposit } = useWallet()
+  const { balances, deposit, frozen } = useWallet()
   const { pushToast } = useUI()
   const assets = Array.from(new Set(['USD', 'BTC', 'ETH', ...Object.keys(balances)]))
 
@@ -35,7 +35,15 @@ export default function Deposit() {
   }
 
   function confirm() {
-    deposit(asset, amount, `Deposit via ${method}`)
+    if (frozen) {
+      setError('Transactions are frozen on this account. Contact support to unfreeze.')
+      return
+    }
+    const ok = deposit(asset, amount, `Deposit via ${method}`)
+    if (!ok) {
+      setError('Deposit failed. Check the amount and try again.')
+      return
+    }
     pushToast('Deposit complete (simulated)', `${fmt(amount)} added to your ${asset} balance.`)
     setDone(true)
   }
@@ -62,6 +70,11 @@ export default function Deposit() {
 
   return (
     <Page title="Deposit" intro="Add simulated funds to your Meridian wallet. All money is simulated." disclaimer>
+      {frozen && (
+        <div className="mb-6 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200" role="alert">
+          Transactions are frozen on this account. You can view balances, but deposits are disabled until support unfreezes the account.
+        </div>
+      )}
       <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
         <Card>
           <ol className="mb-6 flex gap-2" aria-label="Deposit steps">

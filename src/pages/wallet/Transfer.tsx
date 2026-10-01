@@ -6,7 +6,7 @@ import { useUI } from '../../store/ui'
 import { formatMoney, formatQty } from '../../lib/market'
 
 export default function Transfer() {
-  const { balances, transfer } = useWallet()
+  const { balances, transfer, frozen } = useWallet()
   const { pushToast } = useUI()
   const assets = Array.from(new Set(['USD', 'BTC', 'ETH', ...Object.keys(balances)]))
 
@@ -22,6 +22,10 @@ export default function Transfer() {
     asset === 'USD' ? formatMoney(n) : `${formatQty(n)} ${asset}`
 
   function submit() {
+    if (frozen) {
+      setError('Transactions are frozen on this account. Contact support to unfreeze.')
+      return
+    }
     if (from === to) {
       setError('Choose two different assets.')
       return
@@ -65,6 +69,11 @@ export default function Transfer() {
 
   return (
     <Page title="Transfer" intro="Move simulated funds between assets in your wallet. All money is simulated." disclaimer>
+      {frozen && (
+        <div className="mb-6 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200" role="alert">
+          Transactions are frozen on this account. Transfers are disabled until support unfreezes the account.
+        </div>
+      )}
       <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
         <Card>
           <div className="space-y-4">

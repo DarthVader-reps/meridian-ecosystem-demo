@@ -4,19 +4,8 @@ import { Page } from '../../components/layout'
 import { useTrading } from '../../store/trading'
 import { useUI } from '../../store/ui'
 import { formatMoney, formatPct, formatQty, timeAgo } from '../../lib/market'
-import assetsData from '../../mock/assets.json'
+import { LIVE_SYMBOLS, useAssets, usePricesLive } from '../../lib/assetPrices'
 
-interface Asset {
-  symbol: string
-  name: string
-  type: string
-  price: number
-  changePct: number
-  sector: string
-}
-
-const assets = assetsData as Asset[]
-const assetMap = new Map(assets.map((a) => [a.symbol, a]))
 const round8 = (n: number) => Math.round(n * 1e8) / 1e8
 
 function ChangePct({ value }: { value: number }) {
@@ -30,6 +19,9 @@ function ChangePct({ value }: { value: number }) {
 export default function DemoTrading() {
   const { demoBalance, positions, orders, placeOrder } = useTrading()
   const pushToast = useUI((s) => s.pushToast)
+  const assets = useAssets()
+  const pricesLive = usePricesLive()
+  const assetMap = new Map(assets.map((a) => [a.symbol, a]))
 
   const [symbol, setSymbol] = useState(assets[0].symbol)
   const [side, setSide] = useState<'buy' | 'sell'>('buy')
@@ -79,7 +71,7 @@ export default function DemoTrading() {
   }
 
   return (
-    <Page title="Demo trading" intro="Practice trading with simulated funds. Prices are illustrative and do not move real markets." disclaimer>
+    <Page title="Demo trading" intro="Simulated funds. BTC, ETH and SOL stream live market prices; every other quote is illustrative and moves no real market." disclaimer>
       <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
         <div className="space-y-6">
           <Card>
@@ -182,7 +174,12 @@ export default function DemoTrading() {
             {selected && (
               <p className="text-sm text-muted">
                 Current price <span className="font-semibold text-ink dark:text-paper">{formatMoney(selected.price)}</span>{' '}
-                <ChangePct value={selected.changePct} />
+                <ChangePct value={selected.changePct} />{' '}
+                {pricesLive && LIVE_SYMBOLS.has(selected.symbol) && (
+                  <span className="inline-flex items-center gap-1 text-xs font-medium text-green-600 dark:text-green-400">
+                    <span className="inline-block h-1.5 w-1.5 rounded-full bg-green-500" aria-hidden /> Live
+                  </span>
+                )}
               </p>
             )}
             <Tabs tabs={[{ id: 'buy', label: 'Buy' }, { id: 'sell', label: 'Sell' }]} value={side} onChange={setSide} />

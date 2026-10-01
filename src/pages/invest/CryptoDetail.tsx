@@ -19,19 +19,7 @@ import { useWallet } from '../../store/wallet'
 import { useUI } from '../../store/ui'
 import { formatMoney, formatPct, formatQty, priceHistory, rangeSlice } from '../../lib/market'
 import type { PricePoint } from '../../lib/market'
-import assetsJson from '../../mock/assets.json'
-
-interface Asset {
-  symbol: string
-  name: string
-  type: 'stock' | 'crypto'
-  price: number
-  changePct: number
-  currency: string
-  sector: string
-}
-
-const assets = assetsJson as unknown as Asset[]
+import { LIVE_SYMBOLS, useAssets, usePricesLive } from '../../lib/assetPrices'
 
 type RangeKey = '1D' | '1W' | '1M' | '1Y' | 'All'
 type Side = 'buy' | 'sell'
@@ -48,10 +36,12 @@ export default function CryptoDetail() {
   const { symbol } = useParams<{ symbol: string }>()
   const navigate = useNavigate()
   const key = (symbol ?? '').toUpperCase()
+  const assets = useAssets()
+  const pricesLive = usePricesLive()
 
   const asset = useMemo(
     () => assets.find((a) => a.type === 'crypto' && a.symbol.toUpperCase() === key),
-    [key],
+    [assets, key],
   )
 
   const [ready, setReady] = useState(false)
@@ -156,7 +146,10 @@ export default function CryptoDetail() {
               <p className="text-sm font-semibold text-ink dark:text-paper">{asset.symbol}</p>
               <p className="text-sm text-muted">{asset.currency}</p>
             </div>
-            <Badge tone={asset.changePct >= 0 ? 'green' : 'red'}>{formatPct(asset.changePct)} today</Badge>
+            <div className="flex items-center gap-2">
+              <Badge tone={asset.changePct >= 0 ? 'green' : 'red'}>{formatPct(asset.changePct)} today</Badge>
+              {pricesLive && LIVE_SYMBOLS.has(asset.symbol) && <Badge tone="green">Live</Badge>}
+            </div>
           </div>
           <div className="mt-4">
             <PriceChart data={data} height={260} />

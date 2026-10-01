@@ -54,6 +54,7 @@ import AdminVehicles from './pages/admin/Vehicles'
 import AdminTransactions from './pages/admin/Transactions'
 import AdminGiveaways from './pages/admin/Giveaways'
 import AdminSettings from './pages/admin/Settings'
+import { startPricePolling } from './store/prices'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -70,6 +71,9 @@ function Shell() {
   useEffect(() => {
     init()
   }, [init])
+  useEffect(() => {
+    startPricePolling()
+  }, [])
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark')
   }, [theme])

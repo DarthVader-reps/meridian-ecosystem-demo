@@ -10,7 +10,7 @@ const METHODS = ['Bank transfer (simulated)', 'Crypto transfer (simulated)']
 const STEPS = ['Amount', 'Method', 'Review']
 
 export default function Withdraw() {
-  const { balances, withdraw } = useWallet()
+  const { balances, withdraw, frozen } = useWallet()
   const { pushToast } = useUI()
   const assets = Array.from(new Set(['USD', 'BTC', 'ETH', ...Object.keys(balances)]))
 
@@ -39,6 +39,10 @@ export default function Withdraw() {
   }
 
   function confirm() {
+    if (frozen) {
+      setError('Transactions are frozen on this account. Contact support to unfreeze.')
+      return
+    }
     const ok = withdraw(asset, amount, `Withdraw via ${method}`)
     if (!ok) {
       setError('Insufficient simulated balance.')
@@ -70,6 +74,11 @@ export default function Withdraw() {
 
   return (
     <Page title="Withdraw" intro="Remove simulated funds from your Meridian wallet. All money is simulated." disclaimer>
+      {frozen && (
+        <div className="mb-6 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200" role="alert">
+          Transactions are frozen on this account. Withdrawals are disabled until support unfreezes the account.
+        </div>
+      )}
       <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
         <Card>
           <ol className="mb-6 flex gap-2" aria-label="Withdrawal steps">

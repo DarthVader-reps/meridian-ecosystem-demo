@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { BRAND } from '../config/brand'
 import { Button, Card, Reveal, SectionHeader, Ticker } from '../components/ui'
-import assets from '../mock/assets.json'
+import { LIVE_SYMBOLS, useAssets, usePricesLive } from '../lib/assetPrices'
 
 const BASE = import.meta.env.BASE_URL
 
@@ -47,7 +47,14 @@ const CHAPTERS = [
 ]
 
 export default function Home() {
-  const tickerItems = assets.map((a) => ({ symbol: a.symbol, price: a.price, changePct: a.changePct }))
+  const assets = useAssets()
+  const pricesLive = usePricesLive()
+  const tickerItems = assets.map((a) => ({
+    symbol: a.symbol,
+    price: a.price,
+    changePct: a.changePct,
+    live: pricesLive && LIVE_SYMBOLS.has(a.symbol),
+  }))
   return (
     <div>
       {/* Hero — full-bleed video, Tesla-style */}

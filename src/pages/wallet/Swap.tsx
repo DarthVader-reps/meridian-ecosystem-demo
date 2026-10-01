@@ -20,7 +20,7 @@ const RATE_OPTIONS = [
 ]
 
 export default function Swap() {
-  const { balances, swap } = useWallet()
+  const { balances, swap, frozen } = useWallet()
   const { pushToast } = useUI()
   const assets = Array.from(new Set(['USD', 'BTC', 'ETH', ...Object.keys(balances)]))
 
@@ -59,6 +59,11 @@ export default function Swap() {
   }
 
   function confirm() {
+    if (frozen) {
+      setConfirmOpen(false)
+      setError('Transactions are frozen on this account. Contact support to unfreeze.')
+      return
+    }
     const ok = swap(from, to, amount, rate)
     setConfirmOpen(false)
     if (!ok) {
@@ -90,6 +95,11 @@ export default function Swap() {
 
   return (
     <Page title="Swap" intro="Exchange one simulated asset for another at a simulated rate. All money is simulated." disclaimer>
+      {frozen && (
+        <div className="mb-6 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200" role="alert">
+          Transactions are frozen on this account. Swaps are disabled until support unfreezes the account.
+        </div>
+      )}
       <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
         <Card>
           <div className="space-y-4">
