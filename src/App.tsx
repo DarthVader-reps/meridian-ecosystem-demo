@@ -37,12 +37,22 @@ import Verify from './pages/account/Verify'
 import Security from './pages/account/Security'
 import Notifications from './pages/account/Notifications'
 import Support from './pages/account/Support'
+import AdminGate from './pages/admin/AdminGate'
+import AdminLayout, { RequireAdmin } from './components/AdminLayout'
+import AdminDashboard from './pages/admin/Dashboard'
+import AdminUsers from './pages/admin/Users'
+import AdminAssets from './pages/admin/Assets'
+import AdminPlans from './pages/admin/Plans'
+import AdminVehicles from './pages/admin/Vehicles'
+import AdminTransactions from './pages/admin/Transactions'
+import AdminGiveaways from './pages/admin/Giveaways'
+import AdminSettings from './pages/admin/Settings'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
-useEffect(() => {
-  window.scrollTo(0, 0)
-}, [pathname])
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [pathname])
   return null
 }
 
@@ -94,6 +104,24 @@ function Shell() {
           <Route path="/account/security" element={<Security />} />
           <Route path="/account/notifications" element={<Notifications />} />
           <Route path="/account/support" element={<Support />} />
+          <Route path="/admin/login" element={<AdminGate />} />
+          <Route
+            path="/admin"
+            element={
+              <RequireAdmin>
+                <AdminLayout />
+              </RequireAdmin>
+            }
+          >
+            <Route index element={<AdminDashboard />} />
+            <Route path="users" element={<AdminUsers />} />
+            <Route path="assets" element={<AdminAssets />} />
+            <Route path="plans" element={<AdminPlans />} />
+            <Route path="vehicles" element={<AdminVehicles />} />
+            <Route path="transactions" element={<AdminTransactions />} />
+            <Route path="giveaways" element={<AdminGiveaways />} />
+            <Route path="settings" element={<AdminSettings />} />
+          </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>

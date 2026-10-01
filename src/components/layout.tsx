@@ -221,7 +221,7 @@ const FOOT_COLS: { title: string; links: { label: string; to: string }[] }[] = [
   { title: 'Invest', links: [{ label: 'Plans', to: '/invest/plans' }, { label: 'Stocks', to: '/invest/stocks' }, { label: 'Crypto', to: '/invest/crypto' }, { label: 'Real estate', to: '/invest/real-estate' }] },
   { title: 'Trading', links: [{ label: 'Demo trading', to: '/trading/demo' }, { label: 'Live markets', to: '/trading/live' }, { label: 'Copy trading', to: '/trading/copy' }, { label: 'AI bot', to: '/trading/bot' }] },
   { title: 'Wallet', links: [{ label: 'Deposit', to: '/wallet/deposit' }, { label: 'Withdraw', to: '/wallet/withdraw' }, { label: 'Swap', to: '/wallet/swap' }, { label: 'History', to: '/wallet/history' }] },
-  { title: 'Account', links: [{ label: 'Profile', to: '/account/profile' }, { label: 'Security', to: '/account/security' }, { label: 'Support', to: '/account/support' }] },
+  { title: 'Account', links: [{ label: 'Profile', to: '/account/profile' }, { label: 'Security', to: '/account/security' }, { label: 'Support', to: '/account/support' }, { label: 'Admin console', to: '/admin/login' }] },
 ]
 
 export function Footer() {
