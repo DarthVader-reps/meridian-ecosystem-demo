@@ -24,6 +24,7 @@ interface NavGroup {
 }
 
 const NAV_GROUPS: NavGroup[] = [
+  { label: 'Dashboard', items: [{ label: 'Overview', to: '/dashboard' }] },
   {
     label: 'Invest',
     items: [

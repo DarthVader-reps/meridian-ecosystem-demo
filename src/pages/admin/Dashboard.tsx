@@ -27,8 +27,20 @@ export default function Dashboard() {
   const { users, assets, plans, vehicles, giveaways, activity, settings } = useAdmin()
 
   const activeUsers = users.filter((u) => u.status === 'active').length
+  const suspendedUsers = users.filter((u) => u.status === 'suspended')
   const totalBalance = users.reduce((s, u) => s + u.balance, 0)
   const activeGiveaways = giveaways.filter((g) => g.status === 'active').length
+
+  const alerts: Array<{ label: string; to: string; tone: 'red' | 'amber' }> = []
+  if (suspendedUsers.length > 0) {
+    alerts.push({ label: `${suspendedUsers.length} suspended user${suspendedUsers.length > 1 ? 's' : ''} need review`, to: '/admin/users', tone: 'red' })
+  }
+  if (activeGiveaways > 0) {
+    alerts.push({ label: `${activeGiveaways} active giveaway${activeGiveaways > 1 ? 's' : ''} awaiting draw`, to: '/admin/giveaways', tone: 'amber' })
+  }
+  if (settings.maintenanceMode) {
+    alerts.push({ label: 'Maintenance mode is ON — demo actions blocked', to: '/admin/settings', tone: 'amber' })
+  }
 
   return (
     <div className="space-y-8">
@@ -49,6 +61,22 @@ export default function Dashboard() {
           />
         </Card>
       </div>
+
+      {alerts.length > 0 && (
+        <Card className="!border-amber-200 dark:!border-amber-900/40">
+          <h3 className="text-base font-semibold text-ink dark:text-paper">Needs attention</h3>
+          <ul className="mt-3 space-y-2">
+            {alerts.map((a) => (
+              <li key={a.label}>
+                <Link to={a.to} className="flex items-center gap-2 text-sm hover:underline">
+                  <Badge tone={a.tone}>{a.tone === 'red' ? 'Action' : 'Notice'}</Badge>
+                  <span className="text-ink dark:text-paper">{a.label} →</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>

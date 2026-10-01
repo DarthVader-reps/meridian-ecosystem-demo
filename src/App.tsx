@@ -5,6 +5,7 @@ import { ErrorBoundary } from './components/ErrorBoundary'
 import { Toasts } from './components/ui'
 import { useUI } from './store/ui'
 import Home from './pages/Home'
+import Dashboard from './pages/Dashboard'
 import NotFound from './pages/NotFound'
 import PlansPage from './pages/invest/Plans'
 import StocksPage from './pages/invest/Stocks'
@@ -72,6 +73,7 @@ function Shell() {
       <main className="flex-1">
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/invest/plans" element={<PlansPage />} />
           <Route path="/invest/stocks" element={<StocksPage />} />
           <Route path="/invest/stocks/:symbol" element={<StockDetail />} />
