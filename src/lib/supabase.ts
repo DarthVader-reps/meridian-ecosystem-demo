@@ -50,7 +50,7 @@ export const supabaseAdapter: AuthAdapter = {
     })
     if (error) return { user: null, error: error.message }
     if (!data.user) return { user: null, error: 'Sign in failed.' }
-    // Enforce admin suspension: a suspended profile cannot start a session.
+    // Enforce suspension: a suspended profile cannot start a session.
     const { data: profile } = await client
       .from('profiles')
       .select('status')

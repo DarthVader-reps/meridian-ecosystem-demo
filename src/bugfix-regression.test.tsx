@@ -6,10 +6,8 @@ import { Modal, Tabs } from './components/ui'
 import { useRequireLogin } from './components/useRequireLogin'
 import { useTrading } from './store/trading'
 import { useAuth } from './store/auth'
-import { useWallet } from './store/wallet'
 import DemoTrading from './pages/trading/DemoTrading'
 import PlansPage from './pages/invest/Plans'
-import AdminTransactions from './pages/admin/Transactions'
 import App from './App'
 
 // Live price polling would hit real exchange APIs from the test runner —
@@ -224,72 +222,15 @@ describe('limit price display (issue: float dust like 184.22000122070312)', () =
   })
 })
 
-describe('admin settings float artifacts (issue: trading fee showed 0.10000000149011612)', () => {
-  it('updateSettings normalizes money fields to 2 decimals', async () => {
-    const { useAdmin } = await import('./store/admin')
-    useAdmin.getState().updateSettings({ tradingFeePct: 0.10000000149011612 })
-    expect(useAdmin.getState().settings.tradingFeePct).toBe(0.1)
-  })
-
-  it('persist rehydration cleans legacy float artifacts from storage', async () => {
-    // Simulate a real browser profile whose localStorage still holds a
-    // pre-fix artifact, then load the store module fresh so zustand's
-    // persist merge runs exactly as it does on page load.
-    vi.resetModules()
-    localStorage.setItem(
-      'meridian-admin',
-      JSON.stringify({
-        state: {
-          settings: {
-            platformName: 'Meridian',
-            maintenanceMode: false,
-            demoBalance: 100000,
-            tradingFeePct: 0.10000000149011612,
-            withdrawalFeeUSD: 5,
-            minDepositUSD: 10,
-            allowSignups: true,
-          },
-        },
-        version: 0,
-      }),
-    )
-    const { useAdmin } = await import('./store/admin')
-    expect(useAdmin.getState().settings.tradingFeePct).toBe(0.1)
-  })
-})
-
-describe('admin transactions ledger (issue: admin credit/debit reasons were invisible)', () => {
-  it('renders the detail column and makes it searchable', () => {
-    const w = useWallet.getState()
-    w.reset()
-    w.deposit('USD', 10, 'Admin credit: QA verification credit')
-    render(
-      <MemoryRouter>
-        <AdminTransactions />
-      </MemoryRouter>,
-    )
-    // The Detail column header and the reason text are visible.
-    expect(screen.getByText('Detail')).toBeTruthy()
-    expect(screen.getByText('Admin credit: QA verification credit')).toBeTruthy()
-    // Searching the reason narrows to the matching row…
-    fireEvent.change(screen.getByLabelText('Search transactions'), { target: { value: 'QA verification' } })
-    expect(screen.getByText('Admin credit: QA verification credit')).toBeTruthy()
-    // …and a non-matching query hides it.
-    fireEvent.change(screen.getByLabelText('Search transactions'), { target: { value: 'no-such-detail-xyz' } })
-    expect(screen.queryByText('Admin credit: QA verification credit')).toBeNull()
-    w.reset()
-  })
-})
-
-describe('environment banner toggle (admin switch for the preview banner)', () => {
+describe('environment banner toggle (settings switch for the preview banner)', () => {
   it('hides the preview banner when switched off, without touching the maintenance banner or per-page disclosures', async () => {
-    const { useAdmin } = await import('./store/admin')
+    const { useSettings } = await import('./store/settings')
     const { DemoBar } = await import('./components/layout')
     // Banner on by default
-    expect(useAdmin.getState().settings.showEnvBanner).toBe(true)
+    expect(useSettings.getState().settings.showEnvBanner).toBe(true)
 
     act(() => {
-      useAdmin.getState().updateSettings({ showEnvBanner: false, maintenanceMode: true })
+      useSettings.getState().updateSettings({ showEnvBanner: false, maintenanceMode: true })
     })
     const { unmount } = render(
       <MemoryRouter>
@@ -302,7 +243,7 @@ describe('environment banner toggle (admin switch for the preview banner)', () =
     unmount()
 
     act(() => {
-      useAdmin.getState().updateSettings({ showEnvBanner: true, maintenanceMode: false })
+      useSettings.getState().updateSettings({ showEnvBanner: true, maintenanceMode: false })
     })
     render(
       <MemoryRouter>

@@ -18,9 +18,6 @@ vi.mock('../lib/depositServer', () => ({
   insertDepositRequest: vi.fn(async () => null),
   updateDepositRequestStatus: vi.fn(async () => {}),
   fetchOwnDepositRequests: vi.fn(async () => null),
-  fetchAllDepositRequests: vi.fn(async () => ({ rows: [], error: null })),
-  clearDepositRequest: vi.fn(async () => null),
-  rejectDepositRequest: vi.fn(async () => null),
 }))
 
 function intent(over: Partial<DepositIntent> = {}): DepositIntent {
@@ -129,7 +126,7 @@ describe('tickDeposits (store integration)', () => {
     const d = useDeposits.getState().deposits[0]
     expect(d.status).toBe('pending-clearance')
     expect(useWallet.getState().balances.BTC ?? 0).toBe(0)
-    expect(useNotifications.getState().notifications.some((n) => n.title === 'Deposit awaiting admin clearance')).toBe(true)
+    expect(useNotifications.getState().notifications.some((n) => n.title === 'Deposit pending review')).toBe(true)
     expect(depositServer.updateDepositRequestStatus).toHaveBeenCalledWith('srv-2', 'pending_clearance')
   })
 

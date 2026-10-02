@@ -3,8 +3,8 @@ import { isSupabaseConfigured } from '../config/supabase'
 
 /**
  * Server-side wallet I/O. Balances and the transaction ledger live in Supabase
- * (wallet_balances / transactions tables) so the admin console can credit,
- * debit and freeze them. When Supabase is not configured the wallet stays
+ * (wallet_balances / transactions tables) so balances can be managed and
+ * frozen server-side. When Supabase is not configured the wallet stays
  * local-only and every function here becomes a no-op returning null.
  */
 
@@ -50,7 +50,7 @@ function requireClient() {
 /**
  * Loads balances, recent ledger entries and the freeze flag for the current
  * user. New users start at zero: there are no opening balances — wallets are
- * funded through deposits, which require admin clearance (build 10).
+ * funded through deposits, which require review before they credit (build 10).
  * Returns null when the wallet is local-only.
  */
 export async function loadServerWallet(): Promise<ServerWalletSnapshot | null> {

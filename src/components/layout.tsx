@@ -3,14 +3,14 @@ import { Link, NavLink, useLocation } from 'react-router-dom'
 import { BRAND, DEMO_DISCLAIMER } from '../config/brand'
 import { useUI } from '../store/ui'
 import { useNotifications } from '../store/notifications'
-import { useAdmin } from '../store/admin'
+import { useSettings } from '../store/settings'
 import { useAuth } from '../store/auth'
 import { cn } from '../lib/cn'
 
 /* ---------- Persistent demo bar ---------- */
 
 export function DemoBar() {
-  const { settings } = useAdmin()
+  const { settings } = useSettings()
   return (
     <>
       {settings.showEnvBanner && (
@@ -336,7 +336,7 @@ const FOOT_COLS: { title: string; links: { label: string; to: string }[] }[] = [
   { title: 'Invest', links: [{ label: 'Plans', to: '/invest/plans' }, { label: 'Stocks', to: '/invest/stocks' }, { label: 'Crypto', to: '/invest/crypto' }, { label: 'Real estate', to: '/invest/real-estate' }] },
   { title: 'Trading', links: [{ label: 'Paper trading', to: '/trading/demo' }, { label: 'Live markets', to: '/trading/live' }, { label: 'Copy trading', to: '/trading/copy' }, { label: 'AI bot', to: '/trading/bot' }] },
   { title: 'Wallet', links: [{ label: 'Deposit', to: '/wallet/deposit' }, { label: 'Withdraw', to: '/wallet/withdraw' }, { label: 'Swap', to: '/wallet/swap' }, { label: 'History', to: '/wallet/history' }] },
-  { title: 'Account', links: [{ label: 'Profile', to: '/account/profile' }, { label: 'Security', to: '/account/security' }, { label: 'Support', to: '/account/support' }, { label: 'Admin console', to: '/admin/login' }] },
+  { title: 'Account', links: [{ label: 'Profile', to: '/account/profile' }, { label: 'Security', to: '/account/security' }, { label: 'Support', to: '/account/support' }] },
 ]
 
 export function Footer() {

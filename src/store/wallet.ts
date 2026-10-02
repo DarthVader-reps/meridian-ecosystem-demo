@@ -17,7 +17,7 @@ export interface Tx {
 interface WalletState {
   balances: Record<string, number>
   transactions: Tx[]
-  /** True when an admin froze this account's transactions. Mutations are blocked. */
+  /** True when this account's transactions were frozen. Mutations are blocked. */
   frozen: boolean
   deposit: (asset: string, amount: number, detail?: string) => boolean
   withdraw: (asset: string, amount: number, detail?: string) => boolean
@@ -34,7 +34,7 @@ interface WalletState {
 
 /**
  * New sign-ups start at zero. There are no opening balances: users fund
- * their wallet through deposits, which require admin clearance (build 10).
+ * their wallet through deposits, which require review before they credit (build 10).
  */
 const initialBalances: Record<string, number> = {}
 

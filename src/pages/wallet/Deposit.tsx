@@ -33,7 +33,7 @@ function statusLabel(d: DepositIntent): string {
   switch (d.status) {
     case 'awaiting': return 'Awaiting deposit'
     case 'confirming': return `Confirming ${d.confirmations}/${d.requiredConfirmations}`
-    case 'pending-clearance': return 'Pending admin clearance'
+    case 'pending-clearance': return 'Pending review'
     case 'cleared': return 'Cleared'
     case 'rejected': return 'Rejected'
     case 'expired': return 'Expired'
@@ -79,7 +79,7 @@ function DepositTracker({ intentId, onNew }: { intentId: string; onNew: () => vo
     },
     {
       key: 'clearance',
-      label: 'Admin clearance',
+      label: 'Review',
       done: cleared,
       active: intent.status === 'pending-clearance',
     },
@@ -119,10 +119,10 @@ function DepositTracker({ intentId, onNew }: { intentId: string; onNew: () => vo
                 <p className="mt-0.5 text-xs text-muted">Send {fmt(intent.amount)} to the address below. Expires in {countdown}.</p>
               )}
               {st.key === 'confirming' && intent.status === 'confirming' && (
-                <p className="mt-0.5 text-xs text-muted">Detected on network. It moves to admin clearance at {intent.requiredConfirmations} confirmations.</p>
+                <p className="mt-0.5 text-xs text-muted">Detected on network. It moves to review at {intent.requiredConfirmations} confirmations.</p>
               )}
               {st.key === 'clearance' && intent.status === 'pending-clearance' && (
-                <p className="mt-0.5 text-xs text-muted">Confirmed on network. Your balance credits once an admin clears the deposit.</p>
+                <p className="mt-0.5 text-xs text-muted">Confirmed on network. Your balance credits once it's been reviewed.</p>
               )}
               {st.key === 'cleared' && cleared && (
                 <p className="mt-0.5 text-xs text-muted">{fmt(intent.amount)} added to your {intent.asset} balance.</p>
@@ -153,7 +153,7 @@ function DepositTracker({ intentId, onNew }: { intentId: string; onNew: () => vo
         )}
         {intent.status === 'cleared' && <Button to="/wallet/history">View history</Button>}
         {intent.status === 'rejected' && (
-          <p className="mt-4 text-sm text-muted">This deposit was rejected by an admin. Create a new deposit to try again.</p>
+          <p className="mt-4 text-sm text-muted">This deposit was not approved. Create a new deposit to try again.</p>
         )}
       </div>
     </Card>

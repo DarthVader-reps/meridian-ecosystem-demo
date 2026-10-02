@@ -45,7 +45,6 @@ const ROUTES = [
   '/signup',
   '/forgot-password',
   '/reset-password',
-  '/admin/login',
   '/nope-not-a-route',
 ]
 

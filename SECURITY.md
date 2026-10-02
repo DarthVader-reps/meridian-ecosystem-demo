@@ -11,7 +11,7 @@
 | Authentication | Supabase Auth (email/password). Sessions are real JWTs when Supabase is configured; a local demo adapter stands in otherwise. |
 | Row ownership | Supabase RLS on all 5 tables (`profiles`, `wallet_balances`, `transactions`, `holdings`, `plan_allocations`). Users touch only their own rows. |
 | Suspension | **Two layers.** Frontend blocks login with an explanatory message; migration `004` also enforces it in RLS via `public.is_active()`, so a suspended user with a still-valid JWT is frozen on the next API call. A suspended admin loses admin powers too. |
-| Admin role | Granted only via SQL (`update profiles set role='admin' …`). `protect_profile_fields` trigger stops non-admins changing `role`/`status`. Admin console reads use read-only RLS policies (`is_admin()`). |
+| Admin role | Granted only via SQL (`update profiles set role='admin' …`). `protect_profile_fields` trigger stops non-admins changing `role`/`status`. Admin reads use read-only RLS policies (`is_admin()`); there is no admin UI in the site build. |
 | Ledger integrity | `transactions` is append-only at the RLS level (no update/delete policies). |
 | Live market prices | BTC, ETH and SOL stream real prices (Kraken → CoinGecko fallback, 60s poll, no keys). The client never trusts a single feed — total failure falls back to seeded mock prices and the UI marks which symbols are live. |
 | Server-side balances | Logged-in users' balances and ledger live in Supabase (`wallet_balances` / `transactions`); the client writes through optimistically and syncs on login. Admins can credit/debit via RLS-gated admin policies — every adjustment writes a ledger row with the reason as the audit trail. |
@@ -22,9 +22,9 @@
 
 ## Known limitations (accepted for the demo)
 
-- **Admin PIN `1234`** unlocks the demo console when no admin Supabase session
-  exists. It is not a real secret — anyone reading the bundle knows it. It only
-  guards simulated local data.
+- **No admin console in the site build** (removed in build 10.1). Approvals,
+  blocks, and suspensions are performed directly in Supabase (SQL); the site
+  itself carries no admin UI, PIN, or mock admin data.
 - **Simulated money math runs client-side.** An authenticated user can call
   their own allowed RLS rows directly; there are no server-side financial
   invariants. Balances moved server-side (build 6) so admins can control them,
@@ -47,7 +47,7 @@
 2. Idempotency keys on every money movement; reconciliation jobs.
 3. Real payment rails (Stripe etc.) with webhook verification — never trust the client.
 4. KYC/AML, sanctions screening, audit logging, data retention policy.
-5. Remove the demo PIN path entirely; enforce MFA for admins.
+5. ~~Remove the demo PIN path entirely~~ (done in build 10.1 — the console no longer ships); enforce MFA for admins.
 6. Real security headers (HSTS, CSP `frame-ancestors`, etc.) via proper hosting.
 7. Dependency scanning in CI (`npm audit` / OSV), lockfile committed.
 8. Incident response plan and backup/restore drills for the database.

@@ -213,8 +213,8 @@ export function tickDeposits(now: number = Date.now()): void {
   }
   for (const d of pendingClearance) {
     useNotifications.getState().notify({
-      title: 'Deposit awaiting admin clearance',
-      body: `${formatQty(d.amount)} ${d.asset} confirmed on network. It will credit once an admin clears it.`,
+      title: 'Deposit pending review',
+      body: `${formatQty(d.amount)} ${d.asset} confirmed on network. It will credit once it's been reviewed.`,
       kind: 'info',
       link: '/wallet/deposit',
     })
@@ -235,7 +235,7 @@ export function tickDeposits(now: number = Date.now()): void {
 }
 
 /**
- * Pull admin decisions (cleared/rejected) for the user's server-backed
+ * Pull review decisions (cleared/rejected) for the user's server-backed
  * intents. On cleared, the balance was credited server-side — re-sync the
  * wallet so it appears locally. Exported for tests.
  */
@@ -258,7 +258,7 @@ export async function pollDepositDecisions(): Promise<void> {
       changed = true
       useNotifications.getState().notify({
         title: 'Deposit rejected',
-        body: `Your ${formatQty(d.amount)} ${d.asset} deposit was rejected by an admin.`,
+        body: `Your ${formatQty(d.amount)} ${d.asset} deposit was not approved.`,
         kind: 'error',
         link: '/wallet/deposit',
       })

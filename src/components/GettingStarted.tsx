@@ -41,7 +41,7 @@ export default function GettingStarted() {
     {
       key: 'deposit',
       title: 'Make your first deposit',
-      body: 'Add BTC, ETH, or USDT — an admin clears it after network confirmation.',
+      body: 'Add BTC, ETH, or USDT — reviewed after network confirmation.',
       to: '/wallet/deposit',
       cta: 'Deposit',
       done: hasClearedDeposit,

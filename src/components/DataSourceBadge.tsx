@@ -1,7 +1,7 @@
 import { Badge } from './ui'
 
 /**
- * Marks where an admin page's data comes from, so live Supabase data is never
+ * Marks where a page's data comes from, so live Supabase data is never
  * confused with the browser-local demo dataset.
  */
 export default function DataSourceBadge({ live }: { live: boolean }) {
