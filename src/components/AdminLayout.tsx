@@ -9,6 +9,7 @@ const LINKS = [
   { to: '/admin/plans', label: 'Plans' },
   { to: '/admin/vehicles', label: 'Vehicles' },
   { to: '/admin/transactions', label: 'Transactions' },
+  { to: '/admin/deposits', label: 'Deposits' },
   { to: '/admin/giveaways', label: 'Giveaways' },
   { to: '/admin/settings', label: 'Settings' },
 ]

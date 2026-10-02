@@ -32,13 +32,13 @@ interface WalletState {
   syncFromServer: () => Promise<boolean>
 }
 
-const initialBalances: Record<string, number> = { USD: 25000, BTC: 0.25, ETH: 2.5 }
+/**
+ * New sign-ups start at zero. There are no opening balances: users fund
+ * their wallet through deposits, which require admin clearance (build 10).
+ */
+const initialBalances: Record<string, number> = {}
 
-const seedTransactions: Tx[] = [
-  { id: 'seed-1', type: 'deposit', asset: 'USD', amount: 25000, detail: 'Opening demo balance', date: new Date(Date.now() - 86400000 * 12).toISOString() },
-  { id: 'seed-2', type: 'swap', asset: 'USD', amount: -3200, detail: 'Swap USD → BTC', date: new Date(Date.now() - 86400000 * 6).toISOString() },
-  { id: 'seed-3', type: 'swap', asset: 'BTC', amount: 0.25, detail: 'Swap USD → BTC', date: new Date(Date.now() - 86400000 * 6).toISOString() },
-]
+const seedTransactions: Tx[] = []
 
 function pushTx(transactions: Tx[], tx: Omit<Tx, 'id' | 'date'>): Tx[] {
   return [{ ...tx, id: uid('tx'), date: new Date().toISOString() }, ...transactions].slice(0, 200)

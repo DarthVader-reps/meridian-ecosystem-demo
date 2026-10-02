@@ -30,8 +30,6 @@ export interface ServerWalletSnapshot {
   frozen: boolean
 }
 
-const OPENING_BALANCES: Record<string, number> = { USD: 25000, BTC: 0.25, ETH: 2.5 }
-
 let serverUserId: string | null = null
 
 /** Called by the auth store on sign-in/sign-up/sign-out. */
@@ -51,8 +49,9 @@ function requireClient() {
 
 /**
  * Loads balances, recent ledger entries and the freeze flag for the current
- * user. Seeds the opening demo balances on first login. Returns null when the
- * wallet is local-only.
+ * user. New users start at zero: there are no opening balances — wallets are
+ * funded through deposits, which require admin clearance (build 10).
+ * Returns null when the wallet is local-only.
  */
 export async function loadServerWallet(): Promise<ServerWalletSnapshot | null> {
   const client = requireClient()
@@ -91,41 +90,21 @@ export async function loadServerWallet(): Promise<ServerWalletSnapshot | null> {
     balances[r.asset] = Number(r.balance)
   }
 
-  let transactions: LocalTx[] = []
-  if (Object.keys(balances).length === 0) {
-    // First login: seed the opening demo balances on the server.
-    const rows = Object.entries(OPENING_BALANCES).map(([asset, balance]) => ({
-      user_id: userId,
-      asset,
-      balance,
-    }))
-    const { error } = await client.from('wallet_balances').upsert(rows, { onConflict: 'user_id,asset' })
-    if (error) throw new Error(error.message)
-    await client.from('transactions').insert({
-      user_id: userId,
-      type: 'deposit',
-      asset: 'USD',
-      amount: 25000,
-      detail: 'Opening demo balance',
-    })
-    balances = { ...OPENING_BALANCES }
-  } else {
-    transactions = ((txRows ?? []) as Array<{
-      id: string
-      type: LocalTx['type']
-      asset: string
-      amount: number
-      detail: string | null
-      created_at: string
-    }>).map((r) => ({
-      id: r.id,
-      type: r.type,
-      asset: r.asset,
-      amount: Number(r.amount),
-      detail: r.detail ?? undefined,
-      date: r.created_at,
-    }))
-  }
+  const transactions: LocalTx[] = ((txRows ?? []) as Array<{
+    id: string
+    type: LocalTx['type']
+    asset: string
+    amount: number
+    detail: string | null
+    created_at: string
+  }>).map((r) => ({
+    id: r.id,
+    type: r.type,
+    asset: r.asset,
+    amount: Number(r.amount),
+    detail: r.detail ?? undefined,
+    date: r.created_at,
+  }))
 
   return { balances, transactions, frozen }
 }
@@ -146,8 +125,12 @@ export async function persistWalletMutation(
     asset,
     balance,
   }))
-  const { error } = await client.from('wallet_balances').upsert(rows, { onConflict: 'user_id,asset' })
-  if (error) throw new Error(error.message)
+  // New users start at zero: an empty map upserts nothing (PostgREST rejects
+  // empty arrays), the ledger entry below still records the mutation.
+  if (rows.length > 0) {
+    const { error } = await client.from('wallet_balances').upsert(rows, { onConflict: 'user_id,asset' })
+    if (error) throw new Error(error.message)
+  }
   if (tx) {
     const { error: txError } = await client.from('transactions').insert({
       user_id: userId,

@@ -30,7 +30,7 @@ export default function GettingStarted() {
     }
   })
 
-  const hasPaidDeposit = useDeposits((s) => s.deposits.some((d) => d.status === 'paid'))
+  const hasClearedDeposit = useDeposits((s) => s.deposits.some((d) => d.status === 'cleared'))
   const hasTraded = useTrading((s) => s.orders.length > seedOrders.length)
   const hasPlan = usePortfolio((s) => s.plans.length > 1)
   const hasGiveaway = useMembership((s) => s.giveawayEntries.length > 0)
@@ -41,10 +41,10 @@ export default function GettingStarted() {
     {
       key: 'deposit',
       title: 'Make your first deposit',
-      body: 'Add BTC, ETH, or USDT — it confirms in about a minute.',
+      body: 'Add BTC, ETH, or USDT — an admin clears it after network confirmation.',
       to: '/wallet/deposit',
       cta: 'Deposit',
-      done: hasPaidDeposit,
+      done: hasClearedDeposit,
     },
     {
       key: 'trade',

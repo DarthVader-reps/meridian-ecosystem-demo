@@ -11,9 +11,15 @@ beforeEach(() => {
 })
 
 describe('wallet balances', () => {
+  it('starts at zero with no opening balance', () => {
+    const w = useWallet.getState()
+    expect(w.balances).toEqual({})
+    expect(w.transactions).toEqual([])
+  })
+
   it('deposit increases the balance and records a transaction', () => {
     const w = useWallet.getState()
-    const before = w.balances.USD
+    const before = w.balances.USD ?? 0
     w.deposit('USD', 500, 'Test deposit')
     const after = useWallet.getState()
     expect(after.balances.USD).toBe(before + 500)
@@ -23,15 +29,16 @@ describe('wallet balances', () => {
 
   it('withdraw rejects amounts above the balance', () => {
     const w = useWallet.getState()
-    const ok = w.withdraw('USD', w.balances.USD + 1)
-    expect(ok).toBe(false)
-    expect(useWallet.getState().balances.USD).toBe(w.balances.USD)
+    expect(w.balances.USD ?? 0).toBe(0)
+    expect(w.withdraw('USD', 1)).toBe(false)
+    expect(useWallet.getState().balances.USD ?? 0).toBe(0)
   })
 
   it('withdraw succeeds within the balance and stores a negative amount', () => {
     const w = useWallet.getState()
-    const before = w.balances.USD
-    expect(w.withdraw('USD', 1000, 'Test')).toBe(true)
+    w.deposit('USD', 5000, 'Fund for withdraw test')
+    const before = useWallet.getState().balances.USD ?? 0
+    expect(useWallet.getState().withdraw('USD', 1000, 'Test')).toBe(true)
     const after = useWallet.getState()
     expect(after.balances.USD).toBe(before - 1000)
     expect(after.transactions[0].amount).toBe(-1000)
@@ -47,9 +54,11 @@ describe('wallet balances', () => {
 describe('wallet swaps', () => {
   it('swap converts at the given rate', () => {
     const w = useWallet.getState()
-    const usdBefore = w.balances.USD
-    const btcBefore = w.balances.BTC
-    expect(w.swap('USD', 'BTC', 1000, 0.00002)).toBe(true)
+    w.deposit('USD', 5000, 'Fund for swap test')
+    const funded = useWallet.getState()
+    const usdBefore = funded.balances.USD ?? 0
+    const btcBefore = funded.balances.BTC ?? 0
+    expect(funded.swap('USD', 'BTC', 1000, 0.00002)).toBe(true)
     const after = useWallet.getState()
     expect(after.balances.USD).toBeCloseTo(usdBefore - 1000, 6)
     expect(after.balances.BTC).toBeCloseTo(btcBefore + 0.02, 6)
@@ -57,15 +66,17 @@ describe('wallet swaps', () => {
 
   it('swap fails when funds are insufficient or assets match', () => {
     const w = useWallet.getState()
-    expect(w.swap('USD', 'BTC', w.balances.USD + 1, 0.00002)).toBe(false)
+    expect(w.swap('USD', 'BTC', 1, 0.00002)).toBe(false)
     expect(w.swap('USD', 'USD', 10, 1)).toBe(false)
     expect(w.swap('USD', 'BTC', 10, 0)).toBe(false)
   })
 
   it('transfer moves value between assets without a rate', () => {
     const w = useWallet.getState()
-    const usdBefore = w.balances.USD
-    expect(w.transfer('USD', 'EUR', 500)).toBe(true)
+    w.deposit('USD', 5000, 'Fund for transfer test')
+    const funded = useWallet.getState()
+    const usdBefore = funded.balances.USD ?? 0
+    expect(funded.transfer('USD', 'EUR', 500)).toBe(true)
     const after = useWallet.getState()
     expect(after.balances.USD).toBe(usdBefore - 500)
     expect(after.balances.EUR).toBe(500)

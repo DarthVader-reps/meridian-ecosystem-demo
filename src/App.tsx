@@ -52,6 +52,7 @@ import AdminAssets from './pages/admin/Assets'
 import AdminPlans from './pages/admin/Plans'
 import AdminVehicles from './pages/admin/Vehicles'
 import AdminTransactions from './pages/admin/Transactions'
+import AdminDeposits from './pages/admin/Deposits'
 import AdminGiveaways from './pages/admin/Giveaways'
 import AdminSettings from './pages/admin/Settings'
 import { startPricePolling } from './store/prices'
@@ -151,6 +152,7 @@ function Shell() {
             <Route path="plans" element={<AdminPlans />} />
             <Route path="vehicles" element={<AdminVehicles />} />
             <Route path="transactions" element={<AdminTransactions />} />
+            <Route path="deposits" element={<AdminDeposits />} />
             <Route path="giveaways" element={<AdminGiveaways />} />
             <Route path="settings" element={<AdminSettings />} />
           </Route>

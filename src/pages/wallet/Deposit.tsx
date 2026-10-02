@@ -20,7 +20,9 @@ function statusTone(s: DepositStatus): 'accent' | 'green' | 'red' | 'neutral' {
   switch (s) {
     case 'awaiting': return 'accent'
     case 'confirming': return 'accent'
-    case 'paid': return 'green'
+    case 'pending-clearance': return 'accent'
+    case 'cleared': return 'green'
+    case 'rejected': return 'red'
     case 'expired':
     case 'cancelled': return 'neutral'
     default: return 'neutral'
@@ -31,7 +33,9 @@ function statusLabel(d: DepositIntent): string {
   switch (d.status) {
     case 'awaiting': return 'Awaiting deposit'
     case 'confirming': return `Confirming ${d.confirmations}/${d.requiredConfirmations}`
-    case 'paid': return 'Paid'
+    case 'pending-clearance': return 'Pending admin clearance'
+    case 'cleared': return 'Cleared'
+    case 'rejected': return 'Rejected'
     case 'expired': return 'Expired'
     case 'cancelled': return 'Cancelled'
   }
@@ -64,15 +68,22 @@ function DepositTracker({ intentId, onNew }: { intentId: string; onNew: () => vo
 
   if (!intent) return null
   const fmt = (n: number) => `${formatQty(n)} ${intent.asset}`
+  const cleared = intent.status === 'cleared'
   const stages: Array<{ key: string; label: string; done: boolean; active: boolean }> = [
     { key: 'awaiting', label: 'Awaiting deposit', done: true, active: intent.status === 'awaiting' },
     {
       key: 'confirming',
-      label: intent.status === 'confirming' ? `Confirming ${intent.confirmations}/${intent.requiredConfirmations}` : 'Confirming',
-      done: intent.status === 'paid',
+      label: intent.status === 'confirming' ? `Confirming ${intent.confirmations}/${intent.requiredConfirmations}` : 'Network confirmations',
+      done: intent.status === 'pending-clearance' || cleared,
       active: intent.status === 'confirming',
     },
-    { key: 'paid', label: 'Paid', done: intent.status === 'paid', active: false },
+    {
+      key: 'clearance',
+      label: 'Admin clearance',
+      done: cleared,
+      active: intent.status === 'pending-clearance',
+    },
+    { key: 'cleared', label: 'Cleared', done: cleared, active: false },
   ]
 
   return (
@@ -108,9 +119,12 @@ function DepositTracker({ intentId, onNew }: { intentId: string; onNew: () => vo
                 <p className="mt-0.5 text-xs text-muted">Send {fmt(intent.amount)} to the address below. Expires in {countdown}.</p>
               )}
               {st.key === 'confirming' && intent.status === 'confirming' && (
-                <p className="mt-0.5 text-xs text-muted">Detected on network. Your balance credits automatically at {intent.requiredConfirmations} confirmations.</p>
+                <p className="mt-0.5 text-xs text-muted">Detected on network. It moves to admin clearance at {intent.requiredConfirmations} confirmations.</p>
               )}
-              {st.key === 'paid' && intent.status === 'paid' && (
+              {st.key === 'clearance' && intent.status === 'pending-clearance' && (
+                <p className="mt-0.5 text-xs text-muted">Confirmed on network. Your balance credits once an admin clears the deposit.</p>
+              )}
+              {st.key === 'cleared' && cleared && (
                 <p className="mt-0.5 text-xs text-muted">{fmt(intent.amount)} added to your {intent.asset} balance.</p>
               )}
             </div>
@@ -131,13 +145,16 @@ function DepositTracker({ intentId, onNew }: { intentId: string; onNew: () => vo
       )}
 
       <div className="mt-6 flex flex-wrap gap-3">
-        {(intent.status === 'awaiting' || intent.status === 'confirming') && (
+        {(intent.status === 'awaiting' || intent.status === 'confirming' || intent.status === 'pending-clearance') && (
           <Button variant="secondary" onClick={() => cancelDeposit(intent.id)}>Cancel deposit</Button>
         )}
-        {(intent.status === 'paid' || intent.status === 'expired' || intent.status === 'cancelled') && (
+        {(intent.status === 'cleared' || intent.status === 'rejected' || intent.status === 'expired' || intent.status === 'cancelled') && (
           <Button variant="secondary" onClick={onNew}>New deposit</Button>
         )}
-        {intent.status === 'paid' && <Button to="/wallet/history">View history</Button>}
+        {intent.status === 'cleared' && <Button to="/wallet/history">View history</Button>}
+        {intent.status === 'rejected' && (
+          <p className="mt-4 text-sm text-muted">This deposit was rejected by an admin. Create a new deposit to try again.</p>
+        )}
       </div>
     </Card>
   )
