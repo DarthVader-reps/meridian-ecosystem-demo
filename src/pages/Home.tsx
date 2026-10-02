@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { BRAND } from '../config/brand'
 import { Button, Card, Reveal, SectionHeader, Ticker } from '../components/ui'
+import VideoFeature from '../components/VideoFeature'
 import { LIVE_SYMBOLS, useAssets, usePricesLive } from '../lib/assetPrices'
 
 const BASE = import.meta.env.BASE_URL
@@ -152,6 +153,9 @@ export default function Home() {
           </div>
         </section>
       ))}
+
+      {/* Video feature — hosted clip, muted until the user opts into sound */}
+      <VideoFeature />
 
       {/* Entry cards */}
       <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6" aria-label="Ecosystem areas">
