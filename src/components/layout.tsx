@@ -12,11 +12,13 @@ export function DemoBar() {
   const { settings } = useAdmin()
   return (
     <>
-      <div className="z-[70] bg-ink text-paper dark:bg-[#2a2a2d]" role="note" aria-label="Preview environment notice">
-        <p className="mx-auto max-w-7xl px-4 py-1.5 text-center text-xs font-medium tracking-wide">
-          Preview environment · Simulated funds · Nothing here is real money.
-        </p>
-      </div>
+      {settings.showEnvBanner && (
+        <div className="z-[70] bg-ink text-paper dark:bg-[#2a2a2d]" role="note" aria-label="Preview environment notice">
+          <p className="mx-auto max-w-7xl px-4 py-1.5 text-center text-xs font-medium tracking-wide">
+            Preview environment · Simulated funds · Nothing here is real money.
+          </p>
+        </div>
+      )}
       {settings.maintenanceMode && (
         <div className="z-[70] bg-amber-500 text-white" role="alert" aria-label="Maintenance mode notice">
           <p className="mx-auto max-w-7xl px-4 py-1.5 text-center text-xs font-semibold tracking-wide">

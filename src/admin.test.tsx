@@ -16,6 +16,7 @@ beforeEach(() => {
     settings: {
       platformName: 'Meridian',
       maintenanceMode: false,
+      showEnvBanner: true,
       demoBalance: 100000,
       tradingFeePct: 0.1,
       withdrawalFeeUSD: 5,

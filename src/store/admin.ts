@@ -80,6 +80,8 @@ export interface ActivityEntry {
 export interface PlatformSettings {
   platformName: string
   maintenanceMode: boolean
+  /** Controls the top "Preview environment · Simulated funds" banner. */
+  showEnvBanner: boolean
   demoBalance: number
   tradingFeePct: number
   withdrawalFeeUSD: number
@@ -255,6 +257,7 @@ export const useAdmin = create<AdminState>()(
       settings: {
         platformName: 'Meridian',
         maintenanceMode: false,
+        showEnvBanner: true,
         demoBalance: 100000,
         tradingFeePct: 0.1,
         withdrawalFeeUSD: 5,

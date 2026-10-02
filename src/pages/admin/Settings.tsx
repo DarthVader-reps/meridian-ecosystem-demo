@@ -54,6 +54,12 @@ export default function Settings() {
         <div className="mt-4 space-y-3">
           <Toggle label="Maintenance mode (shows banner, blocks actions)" checked={form.maintenanceMode} onChange={() => set('maintenanceMode', !form.maintenanceMode)} />
           <Toggle label="Allow new signups" checked={form.allowSignups} onChange={() => set('allowSignups', !form.allowSignups)} />
+          <div>
+            <Toggle label="Show environment banner" checked={form.showEnvBanner} onChange={() => set('showEnvBanner', !form.showEnvBanner)} />
+            <p className="mt-1 text-xs text-muted">
+              The top banner discloses the preview environment and simulated funds. Per-page money disclosures always stay on.
+            </p>
+          </div>
         </div>
       </Card>
 

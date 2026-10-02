@@ -280,3 +280,35 @@ describe('admin transactions ledger (issue: admin credit/debit reasons were invi
     w.reset()
   })
 })
+
+describe('environment banner toggle (admin switch for the preview banner)', () => {
+  it('hides the preview banner when switched off, without touching the maintenance banner or per-page disclosures', async () => {
+    const { useAdmin } = await import('./store/admin')
+    const { DemoBar } = await import('./components/layout')
+    // Banner on by default
+    expect(useAdmin.getState().settings.showEnvBanner).toBe(true)
+
+    act(() => {
+      useAdmin.getState().updateSettings({ showEnvBanner: false, maintenanceMode: true })
+    })
+    const { unmount } = render(
+      <MemoryRouter>
+        <DemoBar />
+      </MemoryRouter>,
+    )
+    expect(screen.queryByText(/Preview environment · Simulated funds/)).toBeNull()
+    // Maintenance banner is independent of the toggle
+    expect(screen.getByText(/Maintenance mode is on/)).toBeTruthy()
+    unmount()
+
+    act(() => {
+      useAdmin.getState().updateSettings({ showEnvBanner: true, maintenanceMode: false })
+    })
+    render(
+      <MemoryRouter>
+        <DemoBar />
+      </MemoryRouter>,
+    )
+    expect(screen.getByText(/Preview environment · Simulated funds/)).toBeTruthy()
+  })
+})

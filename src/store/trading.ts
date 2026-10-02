@@ -42,7 +42,7 @@ const seedOrders: Order[] = [
 ]
 
 const BOT_LINES = [
-  'Scanning momentum across 14 assets',
+  'Scanning momentum across 15 assets',
   'Mean-reversion signal on NOVAP, sizing 0.5%',
   'Volatility filter passed, holding cash 62%',
   'Trailing stop tightened on ETH position',

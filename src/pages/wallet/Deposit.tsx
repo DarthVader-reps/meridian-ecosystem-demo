@@ -3,27 +3,40 @@ import { Page } from '../../components/layout'
 import { Button, Card, Field, Input, Select, Stat } from '../../components/ui'
 import { useWallet } from '../../store/wallet'
 import { useUI } from '../../store/ui'
-import { formatMoney, formatQty } from '../../lib/market'
+import { formatQty } from '../../lib/market'
+import {
+  CRYPTO_NETWORKS,
+  DEPOSIT_ASSETS,
+  SAMPLE_DEPOSIT_ADDRESS,
+  shortAddress,
+  type DepositAsset,
+} from '../../lib/crypto'
 
-const METHODS = ['Bank transfer (simulated)', 'Card (simulated)', 'Crypto transfer (simulated)']
-
-const STEPS = ['Amount', 'Method', 'Review']
+const STEPS = ['Amount', 'Network', 'Review']
 
 export default function Deposit() {
   const { balances, deposit, frozen } = useWallet()
   const { pushToast } = useUI()
-  const assets = Array.from(new Set(['USD', 'BTC', 'ETH', ...Object.keys(balances)]))
 
   const [step, setStep] = useState(1)
-  const [asset, setAsset] = useState('USD')
+  const [asset, setAsset] = useState<DepositAsset>('BTC')
   const [amountStr, setAmountStr] = useState('')
-  const [method, setMethod] = useState(METHODS[0])
+  const [network, setNetwork] = useState(CRYPTO_NETWORKS.BTC[0])
   const [error, setError] = useState('')
   const [done, setDone] = useState(false)
+  const [copied, setCopied] = useState(false)
 
   const amount = Number(amountStr)
   const balance = balances[asset] ?? 0
-  const fmt = (n: number) => (asset === 'USD' ? formatMoney(n) : `${formatQty(n)} ${asset}`)
+  const fmt = (n: number) => `${formatQty(n)} ${asset}`
+  const address = SAMPLE_DEPOSIT_ADDRESS[network] ?? ''
+
+  function pickAsset(a: DepositAsset) {
+    setAsset(a)
+    setNetwork(CRYPTO_NETWORKS[a][0])
+    setError('')
+    setCopied(false)
+  }
 
   function nextFromStep1() {
     if (!amountStr || Number.isNaN(amount) || amount <= 0) {
@@ -34,12 +47,24 @@ export default function Deposit() {
     setStep(2)
   }
 
+  function copyAddress() {
+    const clip = navigator.clipboard
+    if (!clip) return
+    void clip.writeText(address).then(
+      () => {
+        setCopied(true)
+        setTimeout(() => setCopied(false), 1500)
+      },
+      () => {},
+    )
+  }
+
   function confirm() {
     if (frozen) {
       setError('Transactions are frozen on this account. Contact support to unfreeze.')
       return
     }
-    const ok = deposit(asset, amount, `Deposit via ${method}`)
+    const ok = deposit(asset, amount, `Deposit via ${network}`)
     if (!ok) {
       setError('Deposit failed. Check the amount and try again.')
       return
@@ -50,14 +75,14 @@ export default function Deposit() {
 
   if (done) {
     return (
-      <Page title="Deposit" intro="Add simulated funds to your Meridian wallet. All money is simulated." disclaimer>
+      <Page title="Deposit" intro="Add simulated crypto to your Meridian wallet. All money is simulated." disclaimer>
         <Card className="max-w-xl">
           <p className="text-lg font-semibold text-ink dark:text-paper">Deposit complete</p>
-          <p className="mt-1 text-sm text-muted">This was simulated. No real money moved.</p>
+          <p className="mt-1 text-sm text-muted">This was simulated. No real crypto moved.</p>
           <dl className="mt-4 space-y-2 text-sm">
             <div className="flex justify-between"><dt className="text-muted">Asset</dt><dd className="font-medium text-ink dark:text-paper">{asset}</dd></div>
             <div className="flex justify-between"><dt className="text-muted">Amount</dt><dd className="font-medium text-ink dark:text-paper">{fmt(amount)}</dd></div>
-            <div className="flex justify-between"><dt className="text-muted">Method</dt><dd className="font-medium text-ink dark:text-paper">{method}</dd></div>
+            <div className="flex justify-between"><dt className="text-muted">Network</dt><dd className="font-medium text-ink dark:text-paper">{network}</dd></div>
             <div className="flex justify-between"><dt className="text-muted">New {asset} balance</dt><dd className="font-medium text-ink dark:text-paper">{fmt(balance)}</dd></div>
           </dl>
           <div className="mt-6">
@@ -69,7 +94,7 @@ export default function Deposit() {
   }
 
   return (
-    <Page title="Deposit" intro="Add simulated funds to your Meridian wallet. All money is simulated." disclaimer>
+    <Page title="Deposit" intro="Add simulated crypto to your Meridian wallet. All money is simulated." disclaimer>
       {frozen && (
         <div className="mb-6 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200" role="alert">
           Transactions are frozen on this account. You can view balances, but deposits are disabled until support unfreezes the account.
@@ -87,11 +112,9 @@ export default function Deposit() {
                   <span
                     aria-current={active ? 'step' : undefined}
                     className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold ${
-                      doneStep
+                      doneStep || active
                         ? 'bg-[var(--color-accent)] text-white'
-                        : active
-                          ? 'bg-[var(--color-accent)] text-white'
-                          : 'bg-mist dark:bg-ink text-muted'
+                        : 'bg-mist dark:bg-ink text-muted'
                     }`}
                   >
                     {n}
@@ -108,9 +131,9 @@ export default function Deposit() {
                 <Select
                   id="deposit-asset"
                   value={asset}
-                  onChange={(e) => { setAsset(e.target.value); setError('') }}
+                  onChange={(e) => pickAsset(e.target.value as DepositAsset)}
                 >
-                  {assets.map((a) => (
+                  {DEPOSIT_ASSETS.map((a) => (
                     <option key={a} value={a}>{a}</option>
                   ))}
                 </Select>
@@ -135,14 +158,28 @@ export default function Deposit() {
 
           {step === 2 && (
             <div className="space-y-4">
-              <Field label="Deposit method" htmlFor="deposit-method">
-                <Select id="deposit-method" value={method} onChange={(e) => setMethod(e.target.value)}>
-                  {METHODS.map((m) => (
+              <Field label="Network" htmlFor="deposit-network">
+                <Select
+                  id="deposit-network"
+                  value={network}
+                  onChange={(e) => { setNetwork(e.target.value); setCopied(false) }}
+                >
+                  {CRYPTO_NETWORKS[asset].map((m) => (
                     <option key={m} value={m}>{m}</option>
                   ))}
                 </Select>
               </Field>
-              <p className="text-sm text-muted">Simulated method. No real transfer happens.</p>
+              <div className="rounded-xl border border-line bg-mist p-4 dark:border-[#2a2a2d] dark:bg-ink">
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted">Your {asset} deposit address</p>
+                <p className="mt-2 font-mono text-sm break-all text-ink dark:text-paper">{address}</p>
+                <div className="mt-3 flex items-center gap-3">
+                  <Button variant="secondary" onClick={copyAddress}>
+                    {copied ? 'Copied' : 'Copy address'}
+                  </Button>
+                  <p className="text-xs text-muted">Sample address — do not send real funds.</p>
+                </div>
+              </div>
+              <p className="text-sm text-muted">Simulated deposit. No real transfer happens.</p>
               <div className="flex justify-between">
                 <Button variant="secondary" onClick={() => setStep(1)}>Back</Button>
                 <Button onClick={() => setStep(3)}>Continue</Button>
@@ -155,7 +192,8 @@ export default function Deposit() {
               <dl className="space-y-2 text-sm">
                 <div className="flex justify-between"><dt className="text-muted">Asset</dt><dd className="font-medium text-ink dark:text-paper">{asset}</dd></div>
                 <div className="flex justify-between"><dt className="text-muted">Amount</dt><dd className="font-medium text-ink dark:text-paper">{fmt(amount)}</dd></div>
-                <div className="flex justify-between"><dt className="text-muted">Method</dt><dd className="font-medium text-ink dark:text-paper">{method}</dd></div>
+                <div className="flex justify-between"><dt className="text-muted">Network</dt><dd className="font-medium text-ink dark:text-paper">{network}</dd></div>
+                <div className="flex justify-between"><dt className="text-muted">Address</dt><dd className="font-mono font-medium text-ink dark:text-paper">{shortAddress(address)}</dd></div>
               </dl>
               <div className="flex justify-between">
                 <Button variant="secondary" onClick={() => setStep(2)}>Back</Button>
