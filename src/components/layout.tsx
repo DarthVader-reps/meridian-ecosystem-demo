@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import { BRAND, DEMO_DISCLAIMER } from '../config/brand'
 import { useUI } from '../store/ui'
+import { useNotifications } from '../store/notifications'
 import { useAdmin } from '../store/admin'
 import { useAuth } from '../store/auth'
 import { cn } from '../lib/cn'
@@ -27,6 +28,35 @@ export function DemoBar() {
         </div>
       )}
     </>
+  )
+}
+
+/* ---------- Notification bell ---------- */
+
+function NotificationBell({ light }: { light?: boolean }) {
+  const unread = useNotifications((s) => s.notifications.filter((n) => !n.read).length)
+  return (
+    <Link
+      to="/account/notifications"
+      aria-label={unread > 0 ? `Notifications, ${unread} unread` : 'Notifications'}
+      className={cn(
+        'relative rounded-full p-2 text-sm cursor-pointer',
+        light ? 'text-white hover:bg-white/10' : 'text-ink dark:text-paper hover:bg-mist dark:hover:bg-ink-soft',
+      )}
+    >
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+      </svg>
+      {unread > 0 && (
+        <span
+          aria-hidden="true"
+          className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[var(--color-accent)] px-1 text-[10px] font-bold text-white"
+        >
+          {unread > 9 ? '9+' : unread}
+        </span>
+      )}
+    </Link>
   )
 }
 
@@ -245,6 +275,7 @@ export function Navbar({ overlay }: { overlay?: boolean }) {
 
         <div className="flex items-center gap-2">
           <AuthNav light={light} />
+          <NotificationBell light={light} />
           <button
             onClick={toggleTheme}
             aria-label={theme === 'light' ? 'Switch to dark theme' : 'Switch to light theme'}

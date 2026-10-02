@@ -55,6 +55,7 @@ import AdminTransactions from './pages/admin/Transactions'
 import AdminGiveaways from './pages/admin/Giveaways'
 import AdminSettings from './pages/admin/Settings'
 import { startPricePolling } from './store/prices'
+import { DEPOSIT_TICK_MS, tickDeposits } from './store/deposits'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -73,6 +74,12 @@ function Shell() {
   }, [init])
   useEffect(() => {
     startPricePolling()
+  }, [])
+  useEffect(() => {
+    // Advance in-flight deposit intents (awaiting → confirming → paid).
+    tickDeposits()
+    const t = setInterval(tickDeposits, DEPOSIT_TICK_MS)
+    return () => clearInterval(t)
   }, [])
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark')

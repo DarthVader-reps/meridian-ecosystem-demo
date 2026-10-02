@@ -4,9 +4,11 @@ import { Page } from '../../components/layout'
 import AuthLabel from '../../components/AuthLabel'
 import { Button, Card, Input } from '../../components/ui'
 import { useAuth } from '../../store/auth'
+import { useNotifications } from '../../store/notifications'
 
 export default function Signup() {
   const { user, initialized, busy, signUp } = useAuth()
+  const notify = useNotifications((s) => s.notify)
   const navigate = useNavigate()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -23,6 +25,12 @@ export default function Signup() {
       setError(err)
       return
     }
+    notify({
+      title: 'Welcome to Meridian',
+      body: 'Your account is ready. Make your first deposit to get started — it takes about a minute.',
+      kind: 'success',
+      link: '/wallet/deposit',
+    })
     navigate('/dashboard', { replace: true })
   }
 

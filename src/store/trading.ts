@@ -36,7 +36,7 @@ interface TradingState {
   reset: () => void
 }
 
-const seedOrders: Order[] = [
+export const seedOrders: Order[] = [
   { id: 'seed-o1', symbol: 'MRDN', side: 'buy', qty: 10, price: 178.2, date: new Date(Date.now() - 86400000 * 2).toISOString() },
   { id: 'seed-o2', symbol: 'ETH', side: 'buy', qty: 0.5, price: 3720.1, date: new Date(Date.now() - 86400000).toISOString() },
 ]

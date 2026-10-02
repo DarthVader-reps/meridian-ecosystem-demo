@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { Page } from '../components/layout'
+import GettingStarted from '../components/GettingStarted'
 import { Button, Card, Stat, Badge, EmptyState } from '../components/ui'
 import { useWallet } from '../store/wallet'
 import { usePortfolio } from '../store/portfolio'
@@ -59,6 +60,7 @@ export default function Dashboard() {
 
   return (
     <Page title="Dashboard" intro="Your money, at a glance. Live balances, holdings, and activity — every transaction updates this page instantly.">
+      <GettingStarted />
       {/* Hero: net worth + primary actions */}
       <Card className="mt-8 !border-[var(--color-accent)]/30 !bg-gradient-to-br !from-accent-soft/60 to-transparent dark:!from-[#1b2a5c]/40">
         <div className="flex flex-wrap items-end justify-between gap-6">
