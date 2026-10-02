@@ -80,7 +80,7 @@ export default function VehiclesPage() {
   }
 
   return (
-    <Page title="Vehicles" intro="Browse the simulated vehicle inventory. All models are fictional demo data.">
+    <Page title="Vehicles" intro="A curated inventory of fictional electric vehicles. All models are simulated demo data.">
       {loading ? (
         <LoadingState label="Loading vehicles" />
       ) : (

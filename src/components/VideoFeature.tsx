@@ -87,8 +87,7 @@ export default function VideoFeature() {
         <Reveal delay={80}>
           <p className="text-xs font-semibold tracking-[0.2em] text-[var(--color-accent)] uppercase">In motion</p>
           <h2 className="mt-3 text-4xl font-semibold tracking-tight sm:text-5xl">
-            <span className="bg-gradient-to-r from-[#1b5cff] to-[#8b5cf6] bg-clip-text text-transparent">
-              Watch the ecosystem work.
+            <span className="text-gradient">Watch the ecosystem work.
             </span>
           </h2>
           <p className="mt-4 text-lg text-muted">

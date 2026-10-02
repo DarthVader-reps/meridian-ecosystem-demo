@@ -37,7 +37,7 @@ describe('VideoFeature', () => {
   it('renders the gradient headline and CTA', () => {
     renderFeature()
     const headline = screen.getByText('Watch the ecosystem work.')
-    expect(headline.className).toContain('bg-clip-text')
+    expect(headline.className).toContain('text-gradient')
     expect(screen.getByRole('link', { name: 'Try demo trading' }).getAttribute('href')).toBe('/trading/demo')
   })
 })

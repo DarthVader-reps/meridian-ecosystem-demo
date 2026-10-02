@@ -7,9 +7,9 @@ import { LIVE_SYMBOLS, useAssets, usePricesLive } from '../lib/assetPrices'
 const BASE = import.meta.env.BASE_URL
 
 const AREAS = [
-  { title: 'Invest', body: 'Plans, stocks, crypto, and real estate in one place.', to: '/invest/plans', cta: 'Start investing' },
-  { title: 'Trade', body: 'Demo trading, live-style charts, and copy trading.', to: '/trading/demo', cta: 'Open trading' },
-  { title: 'Vehicles', body: 'Browse a fictional electric inventory.', to: '/vehicles', cta: 'Explore inventory' },
+  { title: 'Invest', body: 'Plans, stocks, crypto, and real estate — one calm place.', to: '/invest/plans', cta: 'Start investing' },
+  { title: 'Trade', body: 'Live-style charts, copy trading, and an AI bot.', to: '/trading/demo', cta: 'Open trading' },
+  { title: 'Vehicles', body: 'A curated inventory of fictional electric vehicles.', to: '/vehicles', cta: 'Explore inventory' },
   { title: 'Membership', body: 'Tiers, VIP access, and giveaways.', to: '/membership', cta: 'View tiers' },
   { title: 'Wallet', body: 'Deposits, swaps, and transfers — all simulated.', to: '/wallet/deposit', cta: 'Fund wallet' },
 ]
@@ -23,7 +23,8 @@ const STATS = [
 const CHAPTERS = [
   {
     eyebrow: 'Invest',
-    title: 'Grow on your terms',
+    title: 'Grow ',
+    accent: 'on your terms',
     body: 'Plans, stocks, crypto, and real estate — one calm dashboard, simulated funds.',
     cta: 'Explore investments',
     to: '/invest/plans',
@@ -31,15 +32,17 @@ const CHAPTERS = [
   },
   {
     eyebrow: 'Trade',
-    title: 'Trade at the speed of now',
-    body: 'Demo trading with live-style charts, copy trading, and an AI bot. Zero real risk.',
+    title: 'Trade at the ',
+    accent: 'speed of now',
+    body: 'Live-style charts, copy trading, and an AI bot — with zero real risk.',
     cta: 'Open trading',
     to: '/trading/demo',
     img: `${BASE}media/trading-visual.webp`,
   },
   {
     eyebrow: 'Vehicles',
-    title: 'Electric, fictional, yours to browse',
+    title: 'Electric, fictional, ',
+    accent: 'yours to browse',
     body: 'A curated inventory of fictional electric vehicles. Reserve a demo test drive.',
     cta: 'Browse inventory',
     to: '/vehicles',
@@ -63,9 +66,11 @@ export default function Home() {
         <video
           className="absolute inset-0 h-full w-full object-cover"
           src={`${BASE}media/hero-car.mp4`}
+          poster={`${BASE}media/vehicle-showcase.webp`}
           autoPlay
           loop
           playsInline
+          preload="metadata"
           aria-hidden="true"
           ref={(el) => {
             if (el) el.muted = true
@@ -77,10 +82,10 @@ export default function Home() {
           <Reveal>
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/60">{BRAND.tagline}</p>
             <h1 className="mt-4 text-5xl font-semibold tracking-tight sm:text-7xl">
-              Money, made manageable.
+              Money, <span className="text-gradient">made manageable.</span>
             </h1>
             <p className="mx-auto mt-5 max-w-xl text-lg text-white/70">
-              Invest, trade, and track everything from one calm dashboard. This demo runs on simulated funds.
+              One calm dashboard to invest, trade, and track everything. This demo runs on simulated funds.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <Link
@@ -139,7 +144,7 @@ export default function Home() {
           <div className={`relative mx-auto w-full max-w-7xl px-4 sm:px-6 ${i % 2 === 1 ? 'text-right' : ''}`}>
             <Reveal className={`max-w-xl ${i % 2 === 1 ? 'ml-auto' : ''}`}>
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/60">{c.eyebrow}</p>
-              <h2 className="mt-3 text-4xl font-semibold tracking-tight sm:text-5xl">{c.title}</h2>
+              <h2 className="mt-3 text-4xl font-semibold tracking-tight sm:text-5xl">{c.title}<span className="text-gradient">{c.accent}</span></h2>
               <p className="mt-4 text-lg text-white/70">{c.body}</p>
               <div className={`mt-8 ${i % 2 === 1 ? 'flex justify-end' : ''}`}>
                 <Link
@@ -160,12 +165,12 @@ export default function Home() {
       {/* Entry cards */}
       <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6" aria-label="Ecosystem areas">
         <Reveal>
-          <SectionHeader title="One ecosystem, five areas" body="Every section below is a working prototype with simulated data. Click through and try things." />
+          <SectionHeader title="One ecosystem, five areas" body="Five working prototypes, one ecosystem. Everything below runs on simulated data — click through and try things." />
         </Reveal>
         <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {AREAS.map((a, i) => (
             <Reveal key={a.to} delay={i * 60}>
-              <Card className="flex h-full flex-col">
+              <Card className="flex h-full flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
                 <h3 className="text-xl font-semibold text-ink dark:text-paper">{a.title}</h3>
                 <p className="mt-2 flex-1 text-sm text-muted">{a.body}</p>
                 <Link to={a.to} className="mt-5 text-sm font-medium text-[var(--color-accent)] hover:underline">
@@ -175,7 +180,7 @@ export default function Home() {
             </Reveal>
           ))}
           <Reveal delay={300}>
-            <Card className="flex h-full flex-col bg-ink text-white dark:bg-[#111114]">
+            <Card className="flex h-full flex-col bg-ink text-white transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:bg-[#111114]">
               <h3 className="text-xl font-semibold">Demo first</h3>
               <p className="mt-2 flex-1 text-sm text-white/70">
                 Simulated funds only. No real payments, no real markets, no real risk.
@@ -191,8 +196,8 @@ export default function Home() {
       {/* CTA */}
       <section className="mx-auto max-w-7xl px-4 py-24 sm:px-6" aria-label="Get started">
         <Reveal className="mx-auto max-w-2xl text-center">
-          <h2 className="text-4xl font-semibold tracking-tight text-ink dark:text-paper">Take the tour</h2>
-          <p className="mt-3 text-base text-muted">Open your portfolio, place a demo trade, or enter a giveaway. It all updates together.</p>
+          <h2 className="text-4xl font-semibold tracking-tight text-ink dark:text-paper">Step inside <span className="text-gradient">the ecosystem</span></h2>
+          <p className="mt-3 text-base text-muted">Open a portfolio, place a demo trade, enter a giveaway — it all updates together.</p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Button size="lg" to="/invest/portfolio">View portfolio</Button>
             <Button size="lg" variant="secondary" to="/membership/giveaways">Enter giveaway</Button>

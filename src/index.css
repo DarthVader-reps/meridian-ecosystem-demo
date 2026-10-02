@@ -45,6 +45,18 @@ body {
   color: #fff;
 }
 
+/*
+ * Gradient display text — Meridian's signature accent for headlines.
+ * Rule: one phrase per headline, display sizes only. Never body copy,
+ * buttons, or small text (gradient text is decorative, not informational).
+ */
+.text-gradient {
+  background: linear-gradient(92deg, var(--color-accent) 10%, #8b5cf6 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
 /* Accessible focus ring */
 :focus-visible {
   outline: 2px solid var(--color-accent);
