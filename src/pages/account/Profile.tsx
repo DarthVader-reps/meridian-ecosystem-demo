@@ -22,11 +22,11 @@ export default function Profile() {
     setErrors(next)
     if (Object.keys(next).length > 0) return
     updateProfile(nameInput.trim(), emailInput.trim())
-    pushToast('Profile updated', 'Your demo profile was saved.')
+    pushToast('Profile updated', 'Your profile was saved.')
   }
 
   return (
-    <Page title="Profile" intro="Manage the details on your demo account. All money is simulated." disclaimer>
+    <Page title="Profile" intro="Manage the details on your account. All money is simulated." disclaimer>
       <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
         <Card>
           <div className="space-y-4">

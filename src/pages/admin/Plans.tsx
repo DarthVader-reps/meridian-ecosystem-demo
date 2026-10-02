@@ -114,7 +114,7 @@ export default function Plans() {
             </Field>
           </div>
         </div>
-        <p className="mt-3 text-xs text-muted">Return ranges are simulated projections for the demo, never guaranteed.</p>
+        <p className="mt-3 text-xs text-muted">Return ranges are simulated projections, never guaranteed.</p>
         <div className="mt-6 flex justify-end gap-3">
           <Button variant="secondary" onClick={() => setModalOpen(false)}>Cancel</Button>
           <Button onClick={save}>{isNew ? 'Add plan' : 'Save changes'}</Button>

@@ -80,7 +80,7 @@ export default function Dashboard() {
       alerts.push({ label: `${activeGiveaways} active giveaway${activeGiveaways > 1 ? 's' : ''} awaiting draw`, to: '/admin/giveaways', tone: 'amber' })
     }
     if (settings.maintenanceMode) {
-      alerts.push({ label: 'Maintenance mode is ON — demo actions blocked', to: '/admin/settings', tone: 'amber' })
+      alerts.push({ label: 'Maintenance mode is ON — actions blocked', to: '/admin/settings', tone: 'amber' })
     }
 
     return (
@@ -88,7 +88,7 @@ export default function Dashboard() {
         <div className="flex items-start justify-between gap-4">
           <SectionHeader
             title="Overview"
-            body="Simulated platform metrics. All figures are demo data stored in your browser."
+            body="Simulated platform metrics. All figures are sample data stored in your browser."
           />
           <DataSourceBadge live={false} />
         </div>
@@ -101,7 +101,7 @@ export default function Dashboard() {
             <Stat
               label="User balances"
               value={`$${(totalBalance / 1000).toFixed(0)}K`}
-              sub={<span>Demo funds under management</span>}
+              sub={<span>Simulated funds under management</span>}
             />
           </Card>
         </div>
@@ -124,7 +124,7 @@ export default function Dashboard() {
 
         <div className="grid gap-4 lg:grid-cols-2">
           <Card>
-            <h3 className="text-base font-semibold text-ink dark:text-paper">Weekly volume (demo $M)</h3>
+            <h3 className="text-base font-semibold text-ink dark:text-paper">Weekly volume (simulated $M)</h3>
             <div className="mt-4 h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={VOLUME_DATA} margin={{ top: 5, right: 10, left: -10, bottom: 0 }}>
@@ -237,7 +237,7 @@ export default function Dashboard() {
     alerts.push({ label: `${stats.suspendedUsers} suspended user${stats.suspendedUsers > 1 ? 's' : ''} need review`, to: '/admin/users', tone: 'red' })
   }
   if (settings.maintenanceMode) {
-    alerts.push({ label: 'Maintenance mode is ON — demo actions blocked', to: '/admin/settings', tone: 'amber' })
+    alerts.push({ label: 'Maintenance mode is ON — actions blocked', to: '/admin/settings', tone: 'amber' })
   }
 
   return (

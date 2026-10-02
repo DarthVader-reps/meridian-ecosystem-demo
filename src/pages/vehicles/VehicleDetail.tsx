@@ -37,7 +37,7 @@ export default function VehicleDetail() {
       <Page title="Vehicle not found">
         <ErrorState
           title="Vehicle not found"
-          body="This vehicle does not exist in the demo inventory."
+          body="This vehicle does not exist in the inventory."
           onRetry={undefined}
         />
         <div className="mt-4 flex justify-center">

@@ -27,7 +27,7 @@ describe('in-app hash navigation', () => {
   it('keeps rendering the shell across client-side navigations', async () => {
     window.location.hash = '#/'
     const { container, unmount } = render(<App />)
-    expect(screen.getByText(/Demo environment – simulated funds/)).toBeTruthy()
+    expect(screen.getByText(/Preview environment · Simulated funds/)).toBeTruthy()
 
     const destinations = ['#/invest/plans', '#/trading/demo', '#/trading/live', '#/wallet/deposit', '#/membership']
     for (const dest of destinations) {
@@ -37,7 +37,7 @@ describe('in-app hash navigation', () => {
       })
       const text = container.textContent ?? ''
       expect(text.length).toBeGreaterThan(500)
-      expect(text).toContain('Demo environment')
+      expect(text).toContain('Preview environment')
     }
     unmount()
     window.location.hash = '#/'
@@ -54,7 +54,7 @@ describe('in-app hash navigation', () => {
     })
     const text = container.textContent ?? ''
     expect(text.length).toBeGreaterThan(500)
-    expect(text).toContain('Demo environment')
+    expect(text).toContain('Preview environment')
     unmount()
     window.location.hash = '#/'
   }, 30000)

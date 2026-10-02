@@ -77,7 +77,7 @@ export default function Giveaways() {
   return (
     <div className="space-y-8">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <SectionHeader title="Giveaways" body="Create draws, edit prizes, and pick winners from demo entries." />
+        <SectionHeader title="Giveaways" body="Create draws, edit prizes, and pick winners from entries." />
         <div className="flex items-center gap-3">
           <DataSourceBadge live={false} />
           <Button onClick={openNew}>New giveaway</Button>
@@ -108,7 +108,7 @@ export default function Giveaways() {
             <Input id="gw-title" value={editing.title} onChange={(e) => setEditing({ ...editing, title: e.target.value })} placeholder="Spring portfolio boost" />
           </Field>
           <Field label="Prize" htmlFor="gw-prize">
-            <Input id="gw-prize" value={editing.prize} onChange={(e) => setEditing({ ...editing, prize: e.target.value })} placeholder="$5,000 demo credit" />
+            <Input id="gw-prize" value={editing.prize} onChange={(e) => setEditing({ ...editing, prize: e.target.value })} placeholder="$5,000 credit" />
           </Field>
           <Field label="Ends in" htmlFor="gw-ends">
             <Input id="gw-ends" value={editing.endsIn ?? ''} onChange={(e) => setEditing({ ...editing, endsIn: e.target.value })} placeholder="7 days" />

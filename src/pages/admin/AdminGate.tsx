@@ -60,7 +60,7 @@ export default function AdminGate() {
       <SectionHeader
         eyebrow="Restricted"
         title="Admin console"
-        body="Enter the demo admin PIN to manage users, content, and platform settings."
+        body="Enter the admin PIN to manage users, content, and platform settings."
       />
       <Card className="mt-8">
         <form onSubmit={submit} className="space-y-4">

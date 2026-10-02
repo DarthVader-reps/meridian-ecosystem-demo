@@ -44,7 +44,7 @@ export default function Security() {
     setCurrent('')
     setNext('')
     setConfirmNext('')
-    pushToast('Password updated (simulated)', 'Your demo password was changed.')
+    pushToast('Password updated (simulated)', 'Your password was changed.')
   }
 
   function revoke(id: string) {
@@ -53,7 +53,7 @@ export default function Security() {
   }
 
   return (
-    <Page title="Security" intro="Manage authentication and sessions for your demo account. All money is simulated." disclaimer>
+    <Page title="Security" intro="Manage authentication and sessions for your account. All money is simulated." disclaimer>
       <div className="max-w-2xl space-y-6">
         <Card>
           <div className="flex items-center justify-between gap-4">

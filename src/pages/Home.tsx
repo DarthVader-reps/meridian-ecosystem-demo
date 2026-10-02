@@ -15,7 +15,7 @@ const AREAS = [
 ]
 
 const STATS = [
-  { value: '$100K', label: 'Demo trading balance' },
+  { value: '$100K', label: 'Paper trading balance' },
   { value: '5', label: 'Ecosystem areas' },
   { value: '0', label: 'Real money at risk' },
 ]
@@ -85,7 +85,7 @@ export default function Home() {
               Money, <span className="text-gradient">made manageable.</span>
             </h1>
             <p className="mx-auto mt-5 max-w-xl text-lg text-white/70">
-              One calm dashboard to invest, trade, and track everything. This demo runs on simulated funds.
+              One calm dashboard to invest, trade, and track everything. Runs on simulated funds.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <Link
@@ -98,7 +98,7 @@ export default function Home() {
                 to="/trading/demo"
                 className="inline-flex min-w-[200px] items-center justify-center rounded-[4px] bg-white/10 px-7 py-3.5 text-base font-medium text-white backdrop-blur-sm transition-colors hover:bg-white/20"
               >
-                Try demo trading
+                Try paper trading
               </Link>
             </div>
           </Reveal>
@@ -181,7 +181,7 @@ export default function Home() {
           ))}
           <Reveal delay={300}>
             <Card className="flex h-full flex-col bg-ink text-white transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:bg-[#111114]">
-              <h3 className="text-xl font-semibold">Demo first</h3>
+              <h3 className="text-xl font-semibold">Simulated by design</h3>
               <p className="mt-2 flex-1 text-sm text-white/70">
                 Simulated funds only. No real payments, no real markets, no real risk.
               </p>
@@ -197,7 +197,7 @@ export default function Home() {
       <section className="mx-auto max-w-7xl px-4 py-24 sm:px-6" aria-label="Get started">
         <Reveal className="mx-auto max-w-2xl text-center">
           <h2 className="text-4xl font-semibold tracking-tight text-ink dark:text-paper">Step inside <span className="text-gradient">the ecosystem</span></h2>
-          <p className="mt-3 text-base text-muted">Open a portfolio, place a demo trade, enter a giveaway — it all updates together.</p>
+          <p className="mt-3 text-base text-muted">Open a portfolio, place a paper trade, enter a giveaway — it all updates together.</p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Button size="lg" to="/invest/portfolio">View portfolio</Button>
             <Button size="lg" variant="secondary" to="/membership/giveaways">Enter giveaway</Button>

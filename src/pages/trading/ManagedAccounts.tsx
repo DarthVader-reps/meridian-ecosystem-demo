@@ -81,7 +81,7 @@ export default function ManagedAccounts() {
       <Modal open={pending !== null} onClose={() => setPending(null)} title="Confirm application">
         {pending && (
           <div className="space-y-4">
-            <p className="text-sm text-muted">Review your demo application before sending.</p>
+            <p className="text-sm text-muted">Review your application before sending.</p>
             <dl className="space-y-2 rounded-xl bg-mist dark:bg-ink p-4 text-sm">
               <div className="flex justify-between">
                 <dt className="text-muted">Manager</dt>
@@ -96,7 +96,7 @@ export default function ManagedAccounts() {
                 <dd className="font-semibold text-ink dark:text-paper">{pending.performanceFeePct.toFixed(0)}% (simulated)</dd>
               </div>
             </dl>
-            <p className="text-xs text-muted">No money moves. This is a demo application only.</p>
+            <p className="text-xs text-muted">No money moves. This application is fully simulated.</p>
             <div className="flex gap-3">
               <Button variant="secondary" className="flex-1" onClick={() => setPending(null)}>
                 Cancel

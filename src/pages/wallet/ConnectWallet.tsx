@@ -4,7 +4,7 @@ import { Button, Card, Modal } from '../../components/ui'
 import { useUI } from '../../store/ui'
 
 const OPTIONS = [
-  { id: 'demo', name: 'Meridian demo wallet', desc: 'The built-in simulated wallet.' },
+  { id: 'demo', name: 'Meridian wallet', desc: 'The built-in simulated wallet.' },
   { id: 'extension', name: 'Browser extension (simulated)', desc: 'Simulated browser extension dialog.' },
   { id: 'hardware', name: 'Hardware (simulated)', desc: 'Simulated hardware wallet dialog.' },
 ]
@@ -26,7 +26,7 @@ export default function ConnectWallet() {
   }
 
   return (
-    <Page title="Connect wallet" intro="Link a simulated wallet to your Meridian demo. All money is simulated." disclaimer>
+    <Page title="Connect wallet" intro="Link a simulated wallet to Meridian. All money is simulated." disclaimer>
       <Card className="max-w-xl">
         {connected ? (
           <div className="space-y-4">

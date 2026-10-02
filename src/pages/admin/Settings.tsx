@@ -26,9 +26,9 @@ export default function Settings() {
   const doReset = () => {
     resetDemo()
     setForm({ ...settings })
-    pushToast('Demo reset', 'All admin data restored to seed values.')
+    pushToast('Data reset', 'All admin data restored to seed values.')
     setConfirmReset(false)
-    log('Demo data reset', 'Admin restored seed data')
+    log('Data reset', 'Admin restored seed data')
   }
 
   const set = <K extends keyof typeof form>(key: K, value: (typeof form)[K]) =>
@@ -37,7 +37,7 @@ export default function Settings() {
   return (
     <div className="space-y-8">
       <div className="flex items-start justify-between gap-4">
-        <SectionHeader title="Settings" body="Platform-wide demo configuration. Changes apply to simulated behavior only." />
+        <SectionHeader title="Settings" body="Platform-wide configuration. Changes apply to simulated behavior only." />
         <DataSourceBadge live={false} />
       </div>
 
@@ -47,12 +47,12 @@ export default function Settings() {
           <Field label="Platform name" htmlFor="set-name">
             <Input id="set-name" value={form.platformName} onChange={(e) => set('platformName', e.target.value)} />
           </Field>
-          <Field label="Demo trading balance (USD)" htmlFor="set-balance">
+          <Field label="Paper trading balance (USD)" htmlFor="set-balance">
             <Input id="set-balance" type="number" min="0" value={form.demoBalance} onChange={(e) => set('demoBalance', Number(e.target.value))} />
           </Field>
         </div>
         <div className="mt-4 space-y-3">
-          <Toggle label="Maintenance mode (shows banner, blocks demo actions)" checked={form.maintenanceMode} onChange={() => set('maintenanceMode', !form.maintenanceMode)} />
+          <Toggle label="Maintenance mode (shows banner, blocks actions)" checked={form.maintenanceMode} onChange={() => set('maintenanceMode', !form.maintenanceMode)} />
           <Toggle label="Allow new signups" checked={form.allowSignups} onChange={() => set('allowSignups', !form.allowSignups)} />
         </div>
       </Card>
@@ -78,11 +78,11 @@ export default function Settings() {
       <Card className="!border-red-200 dark:!border-red-900/40">
         <h3 className="text-base font-semibold text-red-700 dark:text-red-400">Danger zone</h3>
         <p className="mt-2 text-sm text-muted">
-          Reset all admin demo data (users, assets, plans, vehicles, giveaways) back to the original seed values.
+          Reset all admin data (users, assets, plans, vehicles, giveaways) back to the original seed values.
           Your personal wallet and portfolio are not affected.
         </p>
         {!confirmReset ? (
-          <Button onClick={() => setConfirmReset(true)} className="!bg-red-600 mt-4">Reset demo data</Button>
+          <Button onClick={() => setConfirmReset(true)} className="!bg-red-600 mt-4">Reset sample data</Button>
         ) : (
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <p className="text-sm font-medium text-ink dark:text-paper">Are you sure? This cannot be undone.</p>

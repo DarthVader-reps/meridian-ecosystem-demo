@@ -69,7 +69,7 @@ export default function VideoFeature() {
               loop
               playsInline
               preload="metadata"
-              aria-label="Meridian demo video (muted by default)"
+              aria-label="Meridian video (muted by default)"
               ref={setVideoRef}
             />
             <button
@@ -99,7 +99,7 @@ export default function VideoFeature() {
               to="/trading/demo"
               className="inline-flex min-w-[200px] items-center justify-center rounded-[4px] bg-[var(--color-accent)] px-7 py-3.5 text-base font-medium text-white transition-opacity hover:opacity-90"
             >
-              Try demo trading
+              Try paper trading
             </Link>
           </div>
         </Reveal>

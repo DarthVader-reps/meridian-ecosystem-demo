@@ -55,7 +55,7 @@ async function renderAt(path: string) {
   window.location.hash = `#${path}`
   const { unmount } = render(<App />)
   // Every page must render the demo bar and some heading
-  expect(screen.getByText(/Demo environment – simulated funds/)).toBeTruthy()
+  expect(screen.getByText(/Preview environment · Simulated funds/)).toBeTruthy()
   unmount()
   window.location.hash = '#/'
 }

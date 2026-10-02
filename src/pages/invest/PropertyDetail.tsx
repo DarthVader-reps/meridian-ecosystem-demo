@@ -172,8 +172,7 @@ export default function PropertyDetail() {
             ) : (
               <div className="space-y-4">
                 <p className="text-sm text-ink dark:text-paper">
-                  {formatMoney(Number(amount), 0)} allocated to {property.name} in simulated funds. This demo records
-                  no real transaction.
+                  {formatMoney(Number(amount), 0)} allocated to {property.name} in simulated funds — no real transaction is recorded.
                 </p>
                 <Button to="/invest/portfolio" className="w-full">
                   View portfolio

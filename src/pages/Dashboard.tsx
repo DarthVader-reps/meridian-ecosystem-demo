@@ -58,7 +58,7 @@ export default function Dashboard() {
   const tierLabel = tier.charAt(0).toUpperCase() + tier.slice(1)
 
   return (
-    <Page title="Dashboard" intro="Your money, at a glance. Live demo balances, holdings, and activity — every transaction updates this page instantly.">
+    <Page title="Dashboard" intro="Your money, at a glance. Live balances, holdings, and activity — every transaction updates this page instantly.">
       {/* Hero: net worth + primary actions */}
       <Card className="mt-8 !border-[var(--color-accent)]/30 !bg-gradient-to-br !from-accent-soft/60 to-transparent dark:!from-[#1b2a5c]/40">
         <div className="flex flex-wrap items-end justify-between gap-6">
@@ -203,7 +203,7 @@ export default function Dashboard() {
       </div>
 
       <p className="mt-6 text-center text-xs text-muted">
-        Demo data only. Balances, trades, and returns are simulated — no real money is involved.
+        Simulated data only. Balances, trades, and returns are simulated — no real money is involved.
       </p>
     </Page>
   )

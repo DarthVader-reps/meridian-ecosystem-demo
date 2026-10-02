@@ -71,14 +71,14 @@ export default function DemoTrading() {
   }
 
   return (
-    <Page title="Demo trading" intro="Simulated funds. BTC, ETH and SOL stream live market prices; every other quote is illustrative and moves no real market." disclaimer>
+    <Page title="Paper trading" intro="Simulated funds. BTC, ETH and SOL stream live market prices; every other quote is illustrative and moves no real market." disclaimer>
       <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
         <div className="space-y-6">
           <Card>
             <Stat
               label="Practice balance"
               value={formatMoney(demoBalance)}
-              sub={<span className="text-muted">Simulated funds for this demo account.</span>}
+              sub={<span className="text-muted">Simulated funds for this account.</span>}
             />
           </Card>
 
@@ -124,7 +124,7 @@ export default function DemoTrading() {
             <h2 className="text-lg font-semibold text-ink dark:text-paper">Order history</h2>
             {orders.length === 0 ? (
               <div className="mt-4">
-                <EmptyState title="No orders yet" body="Every order you place in this demo is recorded here." />
+                <EmptyState title="No orders yet" body="Every order you place is recorded here." />
               </div>
             ) : (
               <div className="mt-4 overflow-x-auto">

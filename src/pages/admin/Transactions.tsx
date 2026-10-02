@@ -114,7 +114,7 @@ export default function Transactions() {
   const demoRows: PlatformTx[] = useMemo(() => {
     const mine: PlatformTx[] = ownTx.map((t) => ({
       id: t.id,
-      user: 'You (demo)',
+      user: 'You (preview)',
       type: t.type,
       asset: t.asset,
       amount: t.amount,

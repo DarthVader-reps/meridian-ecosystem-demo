@@ -12,9 +12,9 @@ export function DemoBar() {
   const { settings } = useAdmin()
   return (
     <>
-      <div className="z-[70] bg-ink text-paper dark:bg-[#2a2a2d]" role="note" aria-label="Demo environment notice">
+      <div className="z-[70] bg-ink text-paper dark:bg-[#2a2a2d]" role="note" aria-label="Preview environment notice">
         <p className="mx-auto max-w-7xl px-4 py-1.5 text-center text-xs font-medium tracking-wide">
-          Demo environment – simulated funds. Nothing here is real money.
+          Preview environment · Simulated funds · Nothing here is real money.
         </p>
       </div>
       {settings.maintenanceMode && (
@@ -127,7 +127,7 @@ const NAV_GROUPS: NavGroup[] = [
   {
     label: 'Trading',
     items: [
-      { label: 'Demo trading', to: '/trading/demo' },
+      { label: 'Paper trading', to: '/trading/demo' },
       { label: 'Live markets', to: '/trading/live' },
       { label: 'Copy trading', to: '/trading/copy' },
       { label: 'AI bot', to: '/trading/bot' },
@@ -301,7 +301,7 @@ export function Navbar({ overlay }: { overlay?: boolean }) {
 
 const FOOT_COLS: { title: string; links: { label: string; to: string }[] }[] = [
   { title: 'Invest', links: [{ label: 'Plans', to: '/invest/plans' }, { label: 'Stocks', to: '/invest/stocks' }, { label: 'Crypto', to: '/invest/crypto' }, { label: 'Real estate', to: '/invest/real-estate' }] },
-  { title: 'Trading', links: [{ label: 'Demo trading', to: '/trading/demo' }, { label: 'Live markets', to: '/trading/live' }, { label: 'Copy trading', to: '/trading/copy' }, { label: 'AI bot', to: '/trading/bot' }] },
+  { title: 'Trading', links: [{ label: 'Paper trading', to: '/trading/demo' }, { label: 'Live markets', to: '/trading/live' }, { label: 'Copy trading', to: '/trading/copy' }, { label: 'AI bot', to: '/trading/bot' }] },
   { title: 'Wallet', links: [{ label: 'Deposit', to: '/wallet/deposit' }, { label: 'Withdraw', to: '/wallet/withdraw' }, { label: 'Swap', to: '/wallet/swap' }, { label: 'History', to: '/wallet/history' }] },
   { title: 'Account', links: [{ label: 'Profile', to: '/account/profile' }, { label: 'Security', to: '/account/security' }, { label: 'Support', to: '/account/support' }, { label: 'Admin console', to: '/admin/login' }] },
 ]
@@ -332,7 +332,7 @@ export function Footer() {
       <div className="border-t border-line dark:border-[#2a2a2d]">
         <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
           <p className="text-xs leading-relaxed text-muted">{DEMO_DISCLAIMER}</p>
-          <p className="mt-2 text-xs text-muted">© 2026 {BRAND.name} demo. Built as a front-end prototype.</p>
+          <p className="mt-2 text-xs text-muted">© 2026 {BRAND.name}. Preview build.</p>
         </div>
       </div>
     </footer>
@@ -344,7 +344,7 @@ export function Footer() {
 const CRUMB_LABELS: Record<string, string> = {
   invest: 'Invest', plans: 'Plans', stocks: 'Stocks', crypto: 'Crypto', 'real-estate': 'Real estate', portfolio: 'Portfolio',
   vehicles: 'Vehicles', membership: 'Membership', my: 'My membership', vip: 'VIP', giveaways: 'Giveaways',
-  trading: 'Trading', demo: 'Demo trading', live: 'Live markets', copy: 'Copy trading', bot: 'AI bot', managed: 'Managed',
+  trading: 'Trading', demo: 'Paper trading', live: 'Live markets', copy: 'Copy trading', bot: 'AI bot', managed: 'Managed',
   wallet: 'Wallet', deposit: 'Deposit', withdraw: 'Withdraw', transfer: 'Transfer', swap: 'Swap', history: 'History', connect: 'Connect wallet',
   account: 'Account', profile: 'Profile', verify: 'Verify identity', security: 'Security', notifications: 'Notifications', support: 'Support',
 }

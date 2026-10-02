@@ -5,8 +5,8 @@ import { useUI } from '../../store/ui'
 
 const ROWS = [
   { key: 'market' as const, title: 'Market updates', body: 'Simulated price movements and market summaries.' },
-  { key: 'product' as const, title: 'Product news', body: 'New demo features and changes to the prototype.' },
-  { key: 'security' as const, title: 'Security alerts', body: 'Sign-ins and security changes on your demo account.' },
+  { key: 'product' as const, title: 'Product news', body: 'New features and changes.' },
+  { key: 'security' as const, title: 'Security alerts', body: 'Sign-ins and security changes on your account.' },
 ]
 
 export default function Notifications() {

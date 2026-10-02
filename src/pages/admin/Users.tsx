@@ -611,7 +611,7 @@ function DemoUsers() {
               {pendingStatus.status === 'active' ? (
                 <>
                   <span className="font-semibold text-ink dark:text-paper">{pendingStatus.name}</span> will be
-                  blocked from this demo until reactivated. This applies to simulated data only.
+                  blocked until reactivated. This applies to simulated data only.
                 </>
               ) : (
                 <>

@@ -50,7 +50,7 @@ export default function Verify() {
   }
 
   return (
-    <Page title="Verify identity" intro="A simulated identity check for the demo. Nothing is uploaded or stored on a server." disclaimer>
+    <Page title="Verify identity" intro="A simulated identity check. Nothing is uploaded or stored on a server." disclaimer>
       <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
         <div className="space-y-6">
           {(verification === 'unverified' || verification === 'rejected') && (
@@ -136,10 +136,10 @@ export default function Verify() {
               <p className="text-lg font-semibold text-ink dark:text-paper">Verification pending</p>
               <p className="mt-1 text-sm text-muted">Your submission is under simulated review.</p>
               <div className="mt-4 flex flex-wrap gap-2">
-                <Button size="sm" onClick={() => { setVerification('approved'); pushToast('Verification approved (simulated)', 'Demo identity marked as approved.') }}>
+                <Button size="sm" onClick={() => { setVerification('approved'); pushToast('Verification approved (simulated)', 'Identity marked as approved.') }}>
                   Simulate approval
                 </Button>
-                <Button size="sm" variant="secondary" onClick={() => { setVerification('rejected'); pushToast('Verification rejected (simulated)', 'Demo identity marked as rejected.') }}>
+                <Button size="sm" variant="secondary" onClick={() => { setVerification('rejected'); pushToast('Verification rejected (simulated)', 'Identity marked as rejected.') }}>
                   Simulate rejection
                 </Button>
               </div>
@@ -149,7 +149,7 @@ export default function Verify() {
           {verification === 'approved' && (
             <Card>
               <p className="text-lg font-semibold text-ink dark:text-paper">Identity verified</p>
-              <p className="mt-1 text-sm text-muted">Your demo identity passed the simulated check.</p>
+              <p className="mt-1 text-sm text-muted">Your identity passed the simulated check.</p>
               <div className="mt-4">
                 <Button variant="secondary" onClick={() => { setVerification('unverified'); setStep(1) }}>
                   Restart verification

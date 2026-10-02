@@ -44,7 +44,7 @@ export default function GiveawaysPage() {
   }
 
   return (
-    <Page title="Giveaways" intro="Win demo credit and experiences. All prizes are simulated.">
+    <Page title="Giveaways" intro="Win credit and experiences. All prizes are simulated.">
       {loading ? (
         <LoadingState label="Loading giveaways" />
       ) : (

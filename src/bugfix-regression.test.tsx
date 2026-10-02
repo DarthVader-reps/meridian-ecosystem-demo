@@ -80,7 +80,7 @@ describe('hub routes redirect instead of 404', () => {
     })
     const text = container.textContent ?? ''
     expect(text).not.toContain('Page not found')
-    expect(text).toContain('Demo environment')
+    expect(text).toContain('Preview environment')
     unmount()
     window.location.hash = '#/'
   }, 15000)

@@ -7,7 +7,7 @@ import { Badge } from './ui'
 export default function DataSourceBadge({ live }: { live: boolean }) {
   return (
     <Badge tone={live ? 'green' : 'amber'}>
-      {live ? 'Live Supabase data' : 'Demo data'}
+      {live ? 'Live Supabase data' : 'Sample data'}
     </Badge>
   )
 }

@@ -14,7 +14,7 @@ function renderFeature() {
 describe('VideoFeature', () => {
   it('autoplays muted and only unmutes on explicit user action', () => {
     renderFeature()
-    const video = screen.getByLabelText('Meridian demo video (muted by default)') as HTMLVideoElement
+    const video = screen.getByLabelText('Meridian video (muted by default)') as HTMLVideoElement
     expect(video.muted).toBe(true)
     expect(video.hasAttribute('autoplay')).toBe(true)
     expect(video.hasAttribute('loop')).toBe(true)
@@ -38,6 +38,6 @@ describe('VideoFeature', () => {
     renderFeature()
     const headline = screen.getByText('Watch the ecosystem work.')
     expect(headline.className).toContain('text-gradient')
-    expect(screen.getByRole('link', { name: 'Try demo trading' }).getAttribute('href')).toBe('/trading/demo')
+    expect(screen.getByRole('link', { name: 'Try paper trading' }).getAttribute('href')).toBe('/trading/demo')
   })
 })

@@ -9,7 +9,7 @@ import { timeAgo } from '../../lib/market'
 const faqs: { q: string; x: string }[] = [
   { q: 'Is this real money?', x: 'No. Everything is simulated with mock data for demonstration. No real funds move.' },
   { q: 'Can I lose money?', x: 'No. Balances, trades, and returns are simulated in your browser only.' },
-  { q: 'How do deposits work?', x: 'Deposits are multi-step simulated forms. They update your demo balance instantly and are stored locally.' },
+  { q: 'How do deposits work?', x: 'Deposits are multi-step simulated forms. They update your balance instantly and are stored locally.' },
   { q: 'Are the returns shown real?', x: 'No. Return ranges are illustrative examples, not predictions or guarantees.' },
   { q: 'Is my identity verified for real?', x: 'No. Verification is a simulated walkthrough. Nothing is uploaded or stored on a server.' },
   { q: 'Can I connect a real wallet?', x: 'No. Wallet connection opens a simulated dialog only. No real blockchain calls are made.' },
@@ -39,11 +39,11 @@ export default function Support() {
     addTicket(subject.trim())
     setSubject('')
     setMessage('')
-    pushToast('Ticket submitted (simulated)', 'Our demo support team will pretend to respond soon.')
+    pushToast('Ticket submitted (simulated)', 'Our support team will respond soon.')
   }
 
   return (
-    <Page title="Support" intro="Answers and a simulated help desk for the demo. All money is simulated." disclaimer>
+    <Page title="Support" intro="Answers and a simulated help desk. All money is simulated." disclaimer>
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="space-y-6">
           <Card>

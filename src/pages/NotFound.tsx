@@ -6,7 +6,7 @@ export default function NotFound() {
     <Page title="Page not found">
       <EmptyState
         title="Nothing here"
-        body="The page you asked for does not exist in this demo."
+        body="The page you asked for does not exist here."
         action={<Button to="/">Go home</Button>}
       />
     </Page>

@@ -4,7 +4,7 @@ import { isSupabaseConfigured } from '../config/supabase'
 export default function AuthLabel({ suffix }: { suffix?: string }) {
   const base = isSupabaseConfigured
     ? 'Secured by Supabase Auth.'
-    : 'Demo auth — accounts live in this browser only.'
+    : 'Local auth — accounts live in this browser only.'
   return (
     <p className="mt-4 text-center text-xs text-muted">
       {base}

@@ -52,7 +52,7 @@ export default function CopyTrading() {
   }
 
   return (
-    <Page title="Copy trading" intro="Follow simulated traders with demo funds. Track records shown are illustrative, not predictive." disclaimer>
+    <Page title="Copy trading" intro="Follow simulated traders with simulated funds. Track records shown are illustrative, not predictive." disclaimer>
       <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
         {traders.map((t) => {
           const active = copiedTraders.includes(t.id)
@@ -111,14 +111,14 @@ export default function CopyTrading() {
         })}
       </div>
       <p className="mt-6 text-sm text-muted">
-        Past simulated performance is not a guarantee of future results. All trading in this demo is paper trading.
+        Past simulated performance is not a guarantee of future results. All trading here is paper trading.
       </p>
 
       <Modal open={pending !== null} onClose={() => setPending(null)} title={pending ? `Copy ${pending.name}?` : 'Copy trader'}>
         {pending && (
           <div className="space-y-4">
             <p className="text-sm text-muted">
-              You will mirror {pending.name}'s simulated trades ({pending.strategy}) with demo funds.
+              You will mirror {pending.name}'s simulated trades ({pending.strategy}) with simulated funds.
               This does not move real markets and you can stop copying at any time.
             </p>
             <div className="flex gap-3">

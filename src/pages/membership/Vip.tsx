@@ -36,7 +36,7 @@ export default function VipPage() {
   }
 
   return (
-    <Page title="VIP" intro="Concierge-style tiers for high-volume demo accounts. Billing is simulated.">
+    <Page title="VIP" intro="Concierge-style tiers for high-volume accounts. Billing is simulated.">
       {loading ? (
         <LoadingState label="Loading VIP tiers" />
       ) : (
